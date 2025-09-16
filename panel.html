@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>HuertoHogar — Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Bootstrap CSS -->
+  <link href="css/bootstrap.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="css/visual.css">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    .hidden{ display:none !important; }
+    .table td, .table th { vertical-align: middle; }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR con logo imagen -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <img src="img/logo-blanco.png" alt="Huerto Hogar" height="60">
+          </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="home.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
+          <li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
+          <li class="nav-item ms-lg-3">
+            <span id="sessionBadge" class="badge bg-light text-dark"></span>
+          </li>
+          <li class="nav-item ms-lg-2">
+            <button class="btn btn-sm btn-primary" onclick="logout();">Cerrar sesión</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container my-5">
+    <!-- PANEL ADMIN -->
+    <section id="adminView" class="section-bg">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Panel de Administración</h1>
+        <span class="badge bg-warning text-dark">Admin</span>
+      </div>
+      <p class="text-secondary">Gestión básica de usuarios guardados en localStorage.</p>
+
+      <div class="card p-3 mb-4">
+        <div class="d-flex flex-column flex-md-row gap-2 align-items-md-center">
+          <div class="flex-grow-1">
+            <label class="form-label">Nuevo usuario (demo)</label>
+            <div class="row g-2">
+              <div class="col-md-4"><input id="nuEmail" class="form-control" placeholder="email@dominio.com"></div>
+              <div class="col-md-3"><input id="nuPass" class="form-control" placeholder="contraseña"></div>
+              <div class="col-md-3">
+                <select id="nuRole" class="form-select">
+                  <option value="user">user</option>
+                  <option value="admin">admin</option>
+                </select>
+              </div>
+              <div class="col-md-2 d-grid"><button class="btn btn-primary" onclick="crearUsuarioDemo();">Crear</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="h5 mb-3">Usuarios registrados</h2>
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Email</th>
+              <th>Rol</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tblUsers"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PANEL USUARIO (esqueleto, por si entras con role user) -->
+    <section id="userView" class="section-bg hidden">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Panel de Usuario</h1>
+        <span class="badge bg-info text-dark">Usuario</span>
+      </div>
+      <p class="text-secondary">Bienvenido/a. Aquí puedes agregar tu contenido de usuario (favoritos, pedidos, notas, etc.).</p>
+
+      <div class="card p-3">
+        <h2 class="h6">Mis notas (demo)</h2>
+        <form class="row g-2" onsubmit="return agregarNota();">
+          <div class="col-9 col-md-10">
+            <input id="txtNota" class="form-control" placeholder="Escribe una nota..." />
+          </div>
+          <div class="col-3 col-md-2 d-grid">
+            <button class="btn btn-primary">Agregar</button>
+          </div>
+        </form>
+        <ul id="listaNotas" class="mt-3 mb-0"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="py-4 text-center mt-5 footer-custom">
+    <p class="mb-0">© 2025 HUERTO HOGAR - Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- Bootstrap JS (para navbar toggler) -->
+  <script src="js/bootstrap.bundle.min.js"></script>
+
+  <!-- Lógica Panel (mismo nivel de JS que vienes usando) -->
+  <script>
+    // Claves localStorage (mismas que en login.html)
+    var LS_USERS   = "demo.users";
+    var LS_SESSION = "demo.session";
+    var LS_NOTAS   = "demo.notas";
+
+    // Utilidades LS
+    function leerLS(clave, defecto){
+      var raw = localStorage.getItem(clave);
+      if(!raw){ return defecto; }
+      try { return JSON.parse(raw); } catch(e){ return defecto; }
+    }
+    function escribirLS(clave, valor){ localStorage.setItem(clave, JSON.stringify(valor)); }
+
+    function getUsers(){ return leerLS(LS_USERS, []); }
+    function saveUsers(arr){ escribirLS(LS_USERS, arr); }
+
+    function getSession(){ return leerLS(LS_SESSION, null); }
+    function setSession(obj){ escribirLS(LS_SESSION, obj); }
+    function clearSession(){ localStorage.removeItem(LS_SESSION); }
+
+    function getNotasDe(email){
+      var mapa = leerLS(LS_NOTAS, {});
+      if(!mapa[email]){ mapa[email] = []; }
+      return mapa[email];
+    }
+    function saveNotasDe(email, notas){
+      var mapa = leerLS(LS_NOTAS, {});
+      mapa[email] = notas;
+      escribirLS(LS_NOTAS, mapa);
+    }
+
+    // Guard de sesión + Render
+    function render(){
+      var sess = getSession();
+      var adminView = document.getElementById("adminView");
+      var userView  = document.getElementById("userView");
+      var badge     = document.getElementById("sessionBadge");
+
+      if(!sess){
+        // No logueado -> volver a login
+        window.location.href = "login.html";
+        return;
+      }
+
+      badge.textContent = sess.email + " (" + sess.role + ")";
+
+      if(sess.role === "admin"){
+        adminView.classList.remove("hidden");
+        userView.classList.add("hidden");
+        cargarTablaUsuarios();
+      }else{
+        adminView.classList.add("hidden");
+        userView.classList.remove("hidden");
+        cargarNotas();
+      }
+    }
+
+    // ---------- Acciones ADMIN ----------
+    function cargarTablaUsuarios(){
+      var tbody = document.getElementById("tblUsers");
+      tbody.innerHTML = "";
+      var users = getUsers();
+      var i;
+      for(i=0;i<users.length;i++){
+        var u = users[i];
+        var tr = document.createElement("tr");
+        tr.innerHTML =
+          "<td>"+ u.email +"</td>"+
+          "<td><span class='badge "+ (u.role==='admin'?'bg-warning text-dark':'bg-secondary') +"'>"+ u.role +"</span></td>"+
+          "<td class='text-end'>"+
+            "<div class='btn-group btn-group-sm' role='group'>"+
+              "<button class='btn btn-outline-success' onclick=\"setRole('"+u.email+"','admin')\">Hacer admin</button>"+
+              "<button class='btn btn-outline-primary' onclick=\"setRole('"+u.email+"','user')\">Hacer user</button>"+
+              "<button class='btn btn-outline-danger' onclick=\"borrarUsuario('"+u.email+"')\">Eliminar</button>"+
+            "</div>"+
+          "</td>";
+        tbody.appendChild(tr);
+      }
+      if(users.length===0){
+        var tr = document.createElement("tr");
+        tr.innerHTML = "<td colspan='3' class='text-secondary'>No hay usuarios.</td>";
+        tbody.appendChild(tr);
+      }
+    }
+
+    function setRole(email, role){
+      if(!esAdminActual()){ Swal.fire("No autorizado","","error"); return; }
+      var users = getUsers();
+      var i, cambiado=false;
+      for(i=0;i<users.length;i++){
+        if(users[i].email===email){
+          users[i].role = role;
+          cambiado = true;
+          break;
+        }
+      }
+      if(cambiado){
+        saveUsers(users);
+        var sess = getSession();
+        if(sess && sess.email===email){ sess.role = role; setSession(sess); }
+        Swal.fire("OK","Rol actualizado","success");
+        render();
+      }
+    }
+
+    function borrarUsuario(email){
+      if(!esAdminActual()){ Swal.fire("No autorizado","","error"); return; }
+      Swal.fire({
+        title: "Eliminar usuario",
+        text: "Esta acción es permanente",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Eliminar",
+        cancelButtonText: "Cancelar"
+      }).then(function(res){
+        if(!res.isConfirmed){ return; }
+        var users = getUsers();
+        var i, nuevos=[];
+        for(i=0;i<users.length;i++){
+          if(users[i].email!==email){ nuevos.push(users[i]); }
+        }
+        saveUsers(nuevos);
+        var sess = getSession();
+        if(sess && sess.email===email){ clearSession(); }
+        Swal.fire("Hecho","Usuario eliminado","success");
+        render();
+      });
+    }
+
+    function esAdminActual(){
+      var sess = getSession();
+      return !!(sess && sess.role==="admin");
+    }
+
+    function crearUsuarioDemo(){
+      if(!esAdminActual()){ Swal.fire("No autorizado","","error"); return; }
+      var email = document.getElementById("nuEmail").value.trim();
+      var pass  = document.getElementById("nuPass").value.trim();
+      var role  = document.getElementById("nuRole").value;
+
+      if(!email || !pass){
+        Swal.fire("Faltan datos","Email y password son obligatorios","warning");
+        return;
+      }
+      var users = getUsers();
+      var i, yaExiste=false;
+      for(i=0;i<users.length;i++){
+        if(users[i].email===email){ yaExiste=true; break; }
+      }
+      if(yaExiste){
+        Swal.fire("Error","Ya existe un usuario con ese email","error");
+        return;
+      }
+      users.push({ email: email, pass: pass, role: role });
+      saveUsers(users);
+      document.getElementById("nuEmail").value="";
+      document.getElementById("nuPass").value="";
+      document.getElementById("nuRole").value="user";
+      Swal.fire("OK","Usuario creado","success");
+      render();
+    }
+
+    // ---------- Acciones USUARIO (demo) ----------
+    function agregarNota(){
+      var sess = getSession();
+      if(!sess){ return false; }
+      var txt = document.getElementById("txtNota");
+      var valor = txt.value.trim();
+      if(!valor){ return false; }
+      var notas = getNotasDe(sess.email);
+      notas.push(valor);
+      saveNotasDe(sess.email, notas);
+      txt.value = "";
+      cargarNotas();
+      return false;
+    }
+
+    function cargarNotas(){
+      var sess = getSession();
+      if(!sess){ return; }
+      var ul = document.getElementById("listaNotas");
+      ul.innerHTML = "";
+      var notas = getNotasDe(sess.email);
+      var i;
+      for(i=0;i<notas.length;i++){
+        var li = document.createElement("li");
+        li.textContent = "• " + notas[i];
+        ul.appendChild(li);
+      }
+      if(notas.length===0){
+        var li = document.createElement("li");
+        li.className="text-secondary";
+        li.textContent = "Aún no tienes notas.";
+        ul.appendChild(li);
+      }
+    }
+
+    function logout(){
+      clearSession();
+      Swal.fire("Sesión cerrada","","info").then(function(){
+        window.location.href = "login.html";
+      });
+    }
+
+    // Inicio
+    render();
+  </script>
+</body>
+</html>
