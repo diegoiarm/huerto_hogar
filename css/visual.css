@@ -80,3 +80,23 @@ h1, h2, h3, .navbar-brand {
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(46, 139, 87, 0.3);
 }
+.logo-fondo-verde {
+    background-color: #2E8B57;    
+    padding: 10px;                
+    border-radius: 8px;           
+    display: inline-block;        
+}
+.texto-esmeralda {
+  color: #198754;
+}
+.fondo-esmeralda {
+  background-color: #198754;
+}
+
+ .nav-pills .nav-link.active {
+  background-color: #198754 !important; 
+  color: #fff !important;
+  }
+.nav-pills .nav-link.active i {
+  color: #fff !important; 
+  }
