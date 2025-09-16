@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>HuertoHogar — Registro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Bootstrap CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="css/visual.css" />
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <img src="img/logo-blanco.png" alt="Huerto Hogar" height="60" />
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarNav"
+        >
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="home.html">Inicio</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="productos.html">Productos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="blog.html">Blog</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="login.html">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="registro.html">Registrarse</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="carrito.html">🛒</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- CONTENIDO -->
+    <main class="container my-5">
+      <section class="section-bg mx-auto" style="max-width: 720px">
+        <h1 class="h4 mb-3">Registro de usuario</h1>
+
+        <form id="frmRegistro" onsubmit="return registrarUsuario();" novalidate>
+          <div class="row g-3">
+            <div class="col-12">
+              <label for="txtNombre" class="form-label">Nombre completo</label>
+              <input type="text" class="form-control" id="txtNombre" required minlength="2" maxlength="50" />
+            </div>
+
+            <div class="col-12">
+              <label for="txtEmail" class="form-label">Correo</label>
+              <input
+                type="email"
+                class="form-control"
+                id="txtEmail"
+                required
+                maxlength="100"
+                placeholder="ej: nombre@duoc.cl"
+              />
+            </div>
+
+            <div class="col-md-6">
+              <label for="txtPass1" class="form-label">Contraseña</label>
+              <input
+                type="password"
+                class="form-control"
+                id="txtPass1"
+                required
+                minlength="4"
+                maxlength="10"
+                placeholder="entre 4 y 10 caracteres"
+              />
+            </div>
+            <div class="col-md-6">
+              <label for="txtPass2" class="form-label"
+                >Confirmar contraseña</label
+              >
+              <input
+                type="password"
+                class="form-control"
+                id="txtPass2"
+                required
+                minlength="4"
+                maxlength="10"
+              />
+            </div>
+
+            <div class="col-md-6">
+              <label for="txtTelefono" class="form-label"
+                >Teléfono (opcional)</label
+              >
+              <input
+                type="tel"
+                class="form-control"
+                id="txtTelefono"
+                placeholder="+56 9 1234 5678"
+                pattern="(\+56\s?)?9\s?\d{4}\s?\d{4}"
+                title="Formato: +56 9 1234 5678 o 9 1234 5678"
+              />
+            </div>
+
+            <!-- Región / Comuna -->
+            <div class="col-md-6">
+              <label for="selRegion" class="form-label">Región</label>
+              <select id="selRegion" class="form-select" required>
+                <option value="">— Seleccione la región —</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="selComuna" class="form-label">Comuna</label>
+              <select id="selComuna" class="form-select" required>
+                <option value="">— Seleccione la comuna —</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <button class="btn btn-primary w-100" type="submit">
+                Registrar
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="py-4 text-center mt-5 footer-custom">
+      <p class="mb-0">© 2025 HUERTO HOGAR - Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- Bootstrap JS para el toggler -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+
+    <!-- LÓGICA REGISTRO -->
+    <script src="js/script-registro.js"></script>
+  </body>
+</html>
