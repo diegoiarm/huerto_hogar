@@ -14,6 +14,9 @@
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@600&display=swap"
     rel="stylesheet">
 
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
   <!-- Estilos personalizados -->
   <link rel="stylesheet" href="css/visual.css">
 </head>
@@ -44,60 +47,133 @@
   </nav>
 
   <!-- HERO -->
-  <section class="py-5 text-center">
+  <section class="hero-section py-5 text-center">
     <div class="container">
-      <h1 class="mb-3">Bienvenido a <span class="highlight">HUERTO HOGAR </span></h1>
-      <p class="lead text-secondary">Las mejores frutas y verduras al alcanze de todos.</p>
-      <a href="#" class="btn btn-primary btn-lg mt-3">Nuestros Productos</a>
+      <h1 class="display-4 mb-3">Bienvenido a <span class="highlight">HUERTO HOGAR</span></h1>
+      <p class="lead text-secondary mb-4">Las mejores frutas y verduras al alcance de todos.</p>
+      <div class="hero-buttons">
+        <a href="productos.html" class="btn btn-primary btn-lg mx-2">Ver Productos</a>
+        <a href="registro.html" class="btn btn-outline-primary btn-lg mx-2">Únete Ahora</a>
+      </div>
     </div>
   </section>
 
-  <!-- SECCIÓN DESTACADOS -->
-  <section class="container">
+  <!-- CARACTERÍSTICAS -->
+  <section class="container my-5">
     <div class="row">
       <div class="col-md-4">
-        <div class="section-bg text-center">
-          <img src="img/frutasyverduras.png" class="img-fluid rounded mb-3" alt="Imagen 1">
-          <h3>Productos</h3>
-          <p class="text-secondary">Descubre nuestros productos.</p>
+        <div class="section-bg text-center p-4">
+          <img src="img/frutasyverduras.png" class="img-fluid rounded mb-3" alt="Productos Frescos">
+          <h3>Productos Frescos</h3>
+          <p class="text-secondary">Seleccionamos cuidadosamente los mejores productos para tu mesa.</p>
         </div>
       </div>
       <div class="col-md-4">
-        <div class="section-bg text-center">
-          <img src="img/agricultor.png" class="img-fluid rounded mb-3" alt="Imagen 2">
+        <div class="section-bg text-center p-4">
+          <img src="img/agricultor.png" class="img-fluid rounded mb-3" alt="Conexión Local">
           <h3>Conexión con el Entorno</h3>
-          <p class="text-secondary">Trabajamos junto a empresas y productores locales para darte los productos más
-            frescos posible.</p>
+          <p class="text-secondary">Trabajamos junto a empresas y productores locales para ofrecerte los productos más
+            frescos.</p>
         </div>
       </div>
       <div class="col-md-4">
-        <div class="section-bg text-center">
-          <img src="img/SUS.png" class="img-fluid rounded mb-3" alt="Imagen 3">
+        <div class="section-bg text-center p-4">
+          <img src="img/SUS.png" class="img-fluid rounded mb-3" alt="Sustentabilidad">
           <h3>Compromiso Sustentable</h3>
           <p class="text-secondary">Promovemos valores de responsabilidad social y respeto por la naturaleza.</p>
         </div>
       </div>
     </div>
-
   </section>
 
 
-  <section>
+  <!-- PRODUCTOS DESTACADOS DINÁMICOS -->
+  <section class="container my-5">
+    <h2 class="text-center mb-4">Productos Destacados</h2>
+    <div id="destacados" class="row"></div>
+  </section>
 
 
-    <div style="text-align: center;">
-      <a href="nosotros.html" class="btn btn-primary btn-lg mt-3">Nosotros</a>
+  <!-- BENEFICIOS -->
+  <section class="bg-light py-5 my-5">
+    <div class="container">
+      <h2 class="text-center mb-5">¿Por qué elegir Huerto Hogar?</h2>
+      <div class="row g-4">
+        <div class="col-md-3">
+          <div class="text-center">
+            <i class="fas fa-truck fs-1 texto-esmeralda mb-3"></i>
+            <h4>Envío Rápido</h4>
+            <p class="text-secondary">Entrega el mismo día en zonas seleccionadas.</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="text-center">
+            <i class="fas fa-leaf fs-1 texto-esmeralda mb-3"></i>
+            <h4>100% Orgánico</h4>
+            <p class="text-secondary">Productos cultivados naturalmente.</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="text-center">
+            <i class="fas fa-award fs-1 texto-esmeralda mb-3"></i>
+            <h4>Calidad Premium</h4>
+            <p class="text-secondary">Selección de los mejores productos.</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="text-center">
+            <i class="fas fa-hand-holding-heart fs-1 texto-esmeralda mb-3"></i>
+            <h4>Apoyo Local</h4>
+            <p class="text-secondary">Trabajamos con agricultores de la zona.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALL TO ACTION -->
+  <section class="container text-center my-5">
+    <div class="section-bg py-5">
+      <h2 class="mb-4">¿Listo para empezar?</h2>
+      <p class="lead text-secondary mb-4">Únete a nuestra comunidad y descubre la diferencia de los productos frescos y
+        orgánicos.</p>
+      <div class="d-flex justify-content-center gap-3">
+        <a href="productos.html" class="btn btn-primary btn-lg">Explorar Productos</a>
+        <a href="nosotros.html" class="btn btn-outline-primary btn-lg">Conoce Más</a>
+      </div>
     </div>
   </section>
 
 
+
   <!-- FOOTER -->
-  <footer class="py-4 text-center mt-5 footer-custom fixed-bottom">
-    <p class="mb-0">© 2025 HUERTO HOGAR - Todos los derechos reservados.</p>
+  <footer class="py-4 text-center mt-5 footer-custom">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h5>Contáctanos</h5>
+          <p class="mb-0">Email: info@huertohogar.cl</p>
+          <p class="mb-0">Teléfono: +56 9 1234 5678</p>
+        </div>
+        <div class="col-md-4">
+          <h5>Síguenos</h5>
+          <div class="social-links">
+            <a href="#" class="text-white text-decoration-none mx-2"><i class="fab fa-facebook"></i></a>
+            <a href="#" class="text-white text-decoration-none mx-2"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-white text-decoration-none mx-2"><i class="fab fa-x"></i></a>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <p class="mb-0">© 2025 HUERTO HOGAR</p>
+          <p class="mb-0">Todos los derechos reservados.</p>
+        </div>
+      </div>
+    </div>
   </footer>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/producto.js"></script>
 </body>
 
 </html>

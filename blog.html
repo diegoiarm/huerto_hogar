@@ -51,59 +51,107 @@
 
   <section class="py-5" id="blog">
     <div class="container">
-      <h2 class="text-center mb-5">Blog - Datos Curiosos</h2>
-      <div class="row g-4">
-        <div class="col-md-6">
-          <div class="section-bg h-100 p-3 rounded">
-            <div class="row align-items-center">
-              <div class="col-6">
-                <img src="img/cajondev.webp" class="img-fluid rounded" alt="Dato curioso 1" width="300" height="auto" />
-              </div>
+      <h2 class="text-center mb-2">Blog</h2>
+      <p class="text-center text-secondary mb-4">Últimas noticias y artículos sobre nuestros productos y sostenibilidad.</p>
 
-              <div class="col-6">
-                <h3>¿Sabías que…?</h3>
-                <p class="text-secondary">
-                  En <strong>HuertoHogar</strong> cada pedido recorre en
-                  promedio menos de <strong>150 km</strong> desde el campo
-                  hasta la puerta del cliente. Esto significa que nuestros
-                  productos llegan más frescos y con una
-                  <em>huella de carbono mucho menor</em> que los del mercado
-                  tradicional.
-                </p>
-                <a href="dato1.html" class="btn btn-primary btn-sm">Leer más</a>
+      <div class="row g-4">
+        <!-- Artículo 1 -->
+        <div class="col-12 col-md-6">
+          <article class="card h-100 shadow-sm border-0">
+            <div class="row g-0 h-100">
+              <div class="col-5">
+                <a href="dato1.html" class="d-block h-100">
+                  <img src="img/cajondev.webp" class="img-fluid rounded-start h-100 object-fit-cover"
+                    alt="Cosecha en cajón directo desde el campo" width="600" height="400" loading="lazy"
+                    decoding="async" sizes="(max-width: 576px) 100vw, (max-width: 992px) 50vw, 600px" />
+                </a>
+              </div>
+              <div class="col-7">
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span
+                      class="badge bg-success-subtle text-success-emphasis border border-success-subtle">Frescura</span>
+                    <time class="text-muted small" datetime="2025-09-10">10 Sep 2025</time>
+                    <span class="text-muted small">· 2 min</span>
+                  </div>
+                  <h3 class="h5 card-title">¿Sabías que…?</h3>
+                  <p class="card-text text-secondary mb-3">
+                    En <strong>HuertoHogar</strong> cada pedido recorre en promedio menos de
+                    <strong>150&nbsp;km</strong> desde el campo hasta tu puerta. Más frescura y una
+                    <em>huella de carbono menor</em> que el retail tradicional.
+                  </p>
+                  <div class="mt-auto">
+                    <a href="dato1.html" class="btn btn-outline-success btn-sm">Leer más</a>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </article>
         </div>
 
-        <div class="col-md-6">
-          <div class="section-bg h-100 p-3 rounded">
-            <div class="row align-items-center">
-              <div class="col-6">
-                <img src="img/empaque.webp" class="img-fluid rounded" alt="Dato curioso 2" />
+        <!-- Artículo 2 -->
+        <div class="col-12 col-md-6">
+          <article class="card h-100 shadow-sm border-0">
+            <div class="row g-0 h-100">
+              <div class="col-5">
+                <a href="dato2.html" class="d-block h-100">
+                  <img src="img/empaque.webp" class="img-fluid rounded-start h-100 object-fit-cover"
+                    alt="Empaques sostenibles y biodegradables" width="600" height="400" loading="lazy" decoding="async"
+                    sizes="(max-width: 576px) 100vw, (max-width: 992px) 50vw, 600px" />
+                </a>
               </div>
-
-              <div class="col-6">
-                <h3>Curiosidad Verde</h3>
-                <p class="text-secondary">
-                  Desde 2022, el <strong>70% de nuestros empaques</strong> son
-                  elaborados con materiales reciclados o biodegradables.
-                  Nuestro compromiso es lograr un
-                  <strong>100% de envases sostenibles</strong> para 2026,
-                  reduciendo plásticos de un solo uso.
-                </p>
-                <a href="dato2.html" class="btn btn-primary btn-sm">Leer más</a>
+              <div class="col-7">
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span
+                      class="badge bg-success-subtle text-success-emphasis border border-success-subtle">Sostenibilidad</span>
+                    <time class="text-muted small" datetime="2025-09-05">5 Sep 2025</time>
+                    <span class="text-muted small">· 3 min</span>
+                  </div>
+                  <h3 class="h5 card-title">Curiosidad Verde</h3>
+                  <p class="card-text text-secondary mb-3">
+                    Desde 2022, el <strong>70%</strong> de nuestros empaques son reciclados o
+                    biodegradables. La meta: <strong>100%</strong> sostenibles para 2026.
+                  </p>
+                  <div class="mt-auto">
+                    <a href="dato2.html" class="btn btn-outline-success btn-sm">Leer más</a>
+                  </div>
+                </div>
               </div>
             </div>
+          </article>
+        </div>
+      </div>
+  </section>
+
+
+  <!-- CTA: Suscripción -->
+  <section class="mt-5">
+    <div class="container">
+      <div class="p-4 p-md-5 rounded bg-success-subtle border border-success-subtle">
+        <div class="row align-items-center g-3">
+          <div class="col-md-8">
+            <h3 class="h4 mb-2" style="font-family:'Playfair Display', serif;">Recibe tips frescos en tu correo</h3>
+            <p class="mb-0 text-secondary">Súmate al boletín mensual con recetas, datos de temporada y descuentos.</p>
+          </div>
+          <div class="col-md-4">
+            <form class="d-flex gap-2" action="suscripcion.html" method="get"
+              aria-label="Formulario de suscripción al boletín">
+              <label for="suscribeEmail" class="visually-hidden">Correo electrónico</label>
+              <input id="suscribeEmail" name="email" type="email" required class="form-control"
+                placeholder="tu@correo.com" />
+              <button class="btn btn-success" type="submit">Suscribirme</button>
+            </form>
           </div>
         </div>
       </div>
     </div>
   </section>
-</body>
 
-<footer class="py-4 text-center footer-custom fixed-bottom">
-  <p class="mb-0">© 2025 HuertoHogar - Todos los derechos reservados.</p>
-</footer>
+
+  <!-- FOOTER -->
+  <footer class="py-4 text-center footer-custom fixed-bottom">
+    <p class="mb-0">© 2025 HuertoHogar - Todos los derechos reservados.</p>
+  </footer>
 
 </html>

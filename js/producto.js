@@ -1,5 +1,11 @@
-var LS_CART     = "cart.items";
-var LS_PRODUCTS = "demo.products"; 
+
+// Constantes para localStorage
+
+var LS_CART = "cart.items";
+var LS_PRODUCTS = "demo.products";
+
+
+// Definiciones de etiquetas y descripciones de las categorías de productos
 
 var CATEGORIES = {
   FRUTAS: {
@@ -24,131 +30,154 @@ var CATEGORIES = {
   }
 };
 
+// Catálogo de productos base
+
 var catalogoBase = [
-  { id: "FR001", nombre: "Manzana Fuji",        precio: 1200, imagen: "img/manzana.webp"   },
-  { id: "FR002", nombre: "Naranja Valencia",    precio: 1000, imagen: "img/naranja.jpg"   },
-  { id: "FR003", nombre: "Plátano Cavendish",   precio:  800, imagen: "img/platano.jpg"   },
-  { id: "VR001", nombre: "Zanahorias Orgánicas",precio:  900, imagen: "img/zanahoria.jpg" },
-  { id: "VR002", nombre: "Espinacas Frescas",   precio:  700, imagen: "img/espinaca.jpg"  },
-  { id: "VR003", nombre: "Pimientos Tricolores",precio: 1500, imagen: "img/pimiento.jpg"  },
-  { id: "PO001", nombre: "Miel Orgánica",       precio: 5000, imagen: "img/miel.png"      },
-  { id: "PO003", nombre: "Quinua Orgánica",     precio: 2000, imagen: "img/quinoa.webp"    },
-  { id: "PL001", nombre: "Leche Entera",        precio: 1800, imagen: "img/leche.webp"     }
+  { id: "FR001", nombre: "Manzana Fuji", precio: 1200, imagen: "img/manzana.webp" },
+  { id: "FR002", nombre: "Naranja Valencia", precio: 1000, imagen: "img/naranja.jpg" },
+  { id: "FR003", nombre: "Plátano Cavendish", precio: 800, imagen: "img/platano.jpg" },
+  { id: "VR001", nombre: "Zanahorias Orgánicas", precio: 900, imagen: "img/zanahoria.jpg" },
+  { id: "VR002", nombre: "Espinacas Frescas", precio: 700, imagen: "img/espinaca.jpg" },
+  { id: "VR003", nombre: "Pimientos Tricolores", precio: 1500, imagen: "img/pimiento.jpg" },
+  { id: "PO001", nombre: "Miel Orgánica", precio: 5000, imagen: "img/miel.png" },
+  { id: "PO003", nombre: "Quinua Orgánica", precio: 2000, imagen: "img/quinoa.webp" },
+  { id: "PL001", nombre: "Leche Entera", precio: 1800, imagen: "img/leche.webp" }
 ];
 
-function setCategoriaPorPrefijo(arr){
-  for(var i=0;i<arr.length;i++){
+// Asignar categoría según como comienza la ID (Prefijo)
+
+function setCategoriaPorPrefijo(arr) {
+  for (var i = 0; i < arr.length; i++) {
     var p = arr[i];
-    var pref = (p.id||"").slice(0,2).toUpperCase();
-    if     (pref === "FR") p.categoria = "FRUTAS";
-    else if(pref === "VR") p.categoria = "VERDURAS";
-    else if(pref === "PO") p.categoria = "ORGANICOS";
-    else if(pref === "PL") p.categoria = "LACTEOS";
+    var pref = (p.id || "").slice(0, 2).toUpperCase();
+    if (pref === "FR") p.categoria = "FRUTAS";
+    else if (pref === "VR") p.categoria = "VERDURAS";
+    else if (pref === "PO") p.categoria = "ORGANICOS";
+    else if (pref === "PL") p.categoria = "LACTEOS";
   }
   return arr;
 }
 setCategoriaPorPrefijo(catalogoBase);
 
+// Funciones para manejar productos y carrito en localStorage
+
 function productosDesdeLS() {
   var arr = [];
   try {
     var adminProds = JSON.parse(localStorage.getItem(LS_PRODUCTS) || "[]");
-    for (var i=0;i<adminProds.length;i++){
+    for (var i = 0; i < adminProds.length; i++) {
       var p = adminProds[i];
-      var id = p.id || ("ADM_" + (p.name||"").replace(/\s+/g,'_') + "_" + i);
+      var id = p.id || ("ADM_" + (p.name || "").replace(/\s+/g, '_') + "_" + i);
       var cat = null;
-      var cstr = (p.category||"").toLowerCase();
-      if      (cstr.indexOf("fruta")   >= 0) cat = "FRUTAS";
+      var cstr = (p.category || "").toLowerCase();
+      if (cstr.indexOf("fruta") >= 0) cat = "FRUTAS";
       else if (cstr.indexOf("verdura") >= 0) cat = "VERDURAS";
-      else if (cstr.indexOf("orgánic") >= 0 || cstr.indexOf("organico")>=0) cat = "ORGANICOS";
-      else if (cstr.indexOf("lácte")   >= 0 || cstr.indexOf("lacteo")  >=0) cat = "LACTEOS";
+      else if (cstr.indexOf("orgánic") >= 0 || cstr.indexOf("organico") >= 0) cat = "ORGANICOS";
+      else if (cstr.indexOf("lácte") >= 0 || cstr.indexOf("lacteo") >= 0) cat = "LACTEOS";
 
       arr.push({
         id: id,
         nombre: p.name || "Producto",
-        precio: parseInt(p.price||0,10),
+        precio: parseInt(p.price || 0, 10),
         imagen: "assets/productos/placeholder.jpg",
         categoria: cat || "ORGANICOS" // por defecto, puedes ajustar
       });
     }
-  } catch(e){}
+  } catch (e) { }
   return arr;
 }
 
-function getCatalogo(){
+// Obtener catálogo completo
+function getCatalogo() {
   return productosDesdeLS().concat(catalogoBase);
 }
 
-function loadCart(){
+// Función para cargar el carrito desde localStorage
+function loadCart() {
   try { return JSON.parse(localStorage.getItem(LS_CART) || "[]"); }
-  catch(e){ return []; }
-}
-function saveCart(arr){ localStorage.setItem(LS_CART, JSON.stringify(arr)); }
-
-function formatCLP(n){
-  return n.toLocaleString("es-CL", { style:"currency", currency:"CLP", maximumFractionDigits:0 });
+  catch (e) { return []; }
 }
 
-function updateCartBadge(){
+// Función para guardar el carrito en localStorage
+
+function saveCart(arr) { localStorage.setItem(LS_CART, JSON.stringify(arr)); }
+
+// Formatear número a CLP
+
+function formatCLP(n) {
+  return n.toLocaleString("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
+}
+
+// Actualizar el badge del carrito en la UI
+
+function updateCartBadge() {
   var badge = document.getElementById("cartBadge");
-  if(!badge) return;
+  if (!badge) return;
   var cart = loadCart();
   var count = 0;
-  for(var i=0;i<cart.length;i++){ count += cart[i].cantidad; }
+  for (var i = 0; i < cart.length; i++) { count += cart[i].cantidad; }
   badge.textContent = count;
 }
 
 // =================== Catálogo (productos.html) ===================
-// estado UI del catálogo
+
+// Variable global para la categoría actual
 var currentCategory = "ALL";
 
-function initCatalogoUI(){
+// Inicializar la interfaz  del catálogo
+function initCatalogoUI() {
   var sel = document.getElementById("filtroCategoria");
-  if(sel){
-    sel.addEventListener("change", function(){
-      currentCategory = sel.value;   
+  if (sel) {
+    sel.addEventListener("change", function () {
+      currentCategory = sel.value;
       renderCategoriaDescripcion(currentCategory);
-      renderCatalogo();              
+      renderCatalogo();
     });
   }
   renderCategoriaDescripcion(currentCategory);
   renderCatalogo();
   updateCartBadge();
+
 }
 
-function renderCategoriaDescripcion(catKey){
-  var box = document.getElementById("descripcionCategoria");
-  if(!box) return;
+// Renderizar descripción de la categoría seleccionada
 
-  if(catKey === "ALL"){
+function renderCategoriaDescripcion(catKey) {
+  var box = document.getElementById("descripcionCategoria");
+  if (!box) return;
+
+  if (catKey === "ALL") {
     box.innerHTML = "<strong>Explora todo nuestro catálogo</strong><br>Filtra por categoría para ver una curaduría de productos.";
     return;
   }
   var data = CATEGORIES[catKey];
-  if(!data){
+  if (!data) {
     box.innerHTML = "";
     return;
   }
-  box.innerHTML = "<strong>"+data.label+"</strong><br>"+data.description;
+  box.innerHTML = "<strong>" + data.label + "</strong><br>" + data.description;
 }
 
-function renderCatalogo(){
+
+// Renderizar el catálogo de productos según la categoría seleccionada
+
+function renderCatalogo() {
   var cont = document.getElementById("productos");
-  if(!cont) return;
+  if (!cont) return;
 
   var productos = getCatalogo();
   cont.innerHTML = "";
 
 
   var list = [];
-  for(var i=0;i<productos.length;i++){
+  for (var i = 0; i < productos.length; i++) {
     var p = productos[i];
-    if(currentCategory === "ALL" || p.categoria === currentCategory){
+    if (currentCategory === "ALL" || p.categoria === currentCategory) {
       list.push(p);
     }
   }
 
-  if(list.length === 0){
+  if (list.length === 0) {
     var vacio = document.createElement("div");
     vacio.className = "col-12";
     vacio.innerHTML = '<div class="text-secondary">No hay productos en esta categoría.</div>';
@@ -156,22 +185,22 @@ function renderCatalogo(){
     return;
   }
 
-  for(var j=0;j<list.length;j++){
+  for (var j = 0; j < list.length; j++) {
     var prod = list[j];
     var col = document.createElement("div");
     col.className = "col-12 col-sm-6 col-md-4";
 
     col.innerHTML = [
       '<div class="card producto-card h-100">',
-        '<img src="'+prod.imagen+'" alt="'+prod.nombre+'">',
-        '<div class="card-body d-flex flex-column">',
-          '<h5 class="card-title">'+prod.nombre+'</h5>',
-          '<p class="card-text mb-1">'+formatCLP(prod.precio)+'</p>',
-          (prod.categoria ? '<span class="badge bg-success align-self-start mb-3">'+ CATEGORIES[prod.categoria].label +'</span>' : ''),
-          '<div class="mt-auto d-grid">',
-            '<button class="btn btn-primary" onclick="agregarAlCarrito(\''+prod.id+'\')">Agregar</button>',
-          '</div>',
-        '</div>',
+      '<img src="' + prod.imagen + '" alt="' + prod.nombre + '">',
+      '<div class="card-body d-flex flex-column">',
+      '<h5 class="card-title">' + prod.nombre + '</h5>',
+      '<p class="card-text mb-1">' + formatCLP(prod.precio) + '</p>',
+      (prod.categoria ? '<span class="badge bg-success align-self-start mb-3">' + CATEGORIES[prod.categoria].label + '</span>' : ''),
+      '<div class="mt-auto d-grid">',
+      '<button class="btn btn-primary" onclick="agregarAlCarrito(\'' + prod.id + '\')">Agregar</button>',
+      '</div>',
+      '</div>',
       '</div>'
     ].join("");
 
@@ -179,24 +208,28 @@ function renderCatalogo(){
   }
 }
 
-function agregarAlCarrito(id){
+// =================== Carrito (carrito.html) ===================
+
+// Funcion para agregar un producto al carrito
+
+function agregarAlCarrito(id) {
   var productos = getCatalogo();
   var prod = null;
-  for(var i=0;i<productos.length;i++){
-    if(productos[i].id === id){ prod = productos[i]; break; }
+  for (var i = 0; i < productos.length; i++) {
+    if (productos[i].id === id) { prod = productos[i]; break; }
   }
-  if(!prod) return;
+  if (!prod) return;
 
   var cart = loadCart();
   var found = false;
-  for(var j=0;j<cart.length;j++){
-    if(cart[j].id === id){
+  for (var j = 0; j < cart.length; j++) {
+    if (cart[j].id === id) {
       cart[j].cantidad += 1;
       found = true;
       break;
     }
   }
-  if(!found){
+  if (!found) {
     cart.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cantidad: 1 });
   }
   saveCart(cart);
@@ -204,49 +237,59 @@ function agregarAlCarrito(id){
   alert(prod.nombre + " agregado al carrito");
 }
 
-function incrementar(index){
+// Funcion para incrementar la cantidad de un producto en el carrito
+
+function incrementar(index) {
   var cart = loadCart();
-  if(!cart[index]) return;
+  if (!cart[index]) return;
   cart[index].cantidad += 1;
   saveCart(cart);
   renderCarrito();
   updateCartBadge();
 }
 
-function decrementar(index){
+// Funcion para decrementar la cantidad de un producto en el carrito
+
+function decrementar(index) {
   var cart = loadCart();
-  if(!cart[index]) return;
+  if (!cart[index]) return;
   cart[index].cantidad -= 1;
-  if(cart[index].cantidad <= 0){ cart.splice(index,1); }
+  if (cart[index].cantidad <= 0) { cart.splice(index, 1); }
   saveCart(cart);
   renderCarrito();
   updateCartBadge();
 }
 
-function eliminarDelCarrito(index){
+// Funcion para eliminar un producto del carrito
+
+function eliminarDelCarrito(index) {
   var cart = loadCart();
-  cart.splice(index,1);
+  cart.splice(index, 1);
   saveCart(cart);
   renderCarrito();
   updateCartBadge();
 }
 
-function vaciarCarrito(){
+// Funcion para vaciar el carrito
+
+function vaciarCarrito() {
   localStorage.removeItem(LS_CART);
   renderCarrito();
   updateCartBadge();
 }
 
-function renderCarrito(){
+// Funcion para renderizar el carrito en la interfaz (carrito.html)
+
+function renderCarrito() {
   var tbody = document.getElementById("tbodyCarrito");
   var totalEl = document.getElementById("totalTexto");
-  if(!tbody || !totalEl) return;
+  if (!tbody || !totalEl) return;
 
   var cart = loadCart();
   tbody.innerHTML = "";
   var total = 0;
 
-  if(cart.length === 0){
+  if (cart.length === 0) {
     var tr = document.createElement("tr");
     tr.innerHTML = '<td colspan="5" class="text-secondary">Tu carrito está vacío.</td>';
     tbody.appendChild(tr);
@@ -254,7 +297,7 @@ function renderCarrito(){
     return;
   }
 
-  for(var i=0;i<cart.length;i++){
+  for (var i = 0; i < cart.length; i++) {
     var item = cart[i];
     var subtotal = item.precio * item.cantidad;
     total += subtotal;
@@ -263,19 +306,41 @@ function renderCarrito(){
     tr.innerHTML = [
       '<td>', item.nombre, '</td>',
       '<td class="text-center">',
-        '<div class="btn-group btn-group-sm" role="group">',
-          '<button class="btn btn-outline-secondary" onclick="decrementar('+i+')">−</button>',
-          '<span class="btn btn-light disabled">', item.cantidad, '</span>',
-          '<button class="btn btn-outline-secondary" onclick="incrementar('+i+')">+</button>',
-        '</div>',
+      '<div class="btn-group btn-group-sm" role="group">',
+      '<button class="btn btn-outline-secondary" onclick="decrementar(' + i + ')">−</button>',
+      '<span class="btn btn-light disabled">', item.cantidad, '</span>',
+      '<button class="btn btn-outline-secondary" onclick="incrementar(' + i + ')">+</button>',
+      '</div>',
       '</td>',
       '<td class="text-end">', formatCLP(item.precio), '</td>',
       '<td class="text-end">', formatCLP(subtotal), '</td>',
       '<td class="text-end">',
-        '<button class="btn btn-outline-danger btn-sm" onclick="eliminarDelCarrito('+i+')">Eliminar</button>',
+      '<button class="btn btn-outline-danger btn-sm" onclick="eliminarDelCarrito(' + i + ')">Eliminar</button>',
       '</td>'
     ].join("");
     tbody.appendChild(tr);
   }
   totalEl.textContent = formatCLP(total);
 }
+
+// Home.html
+
+// Renderizar los 3 primeros productos del catálogo
+document.addEventListener("DOMContentLoaded", function () {
+  var destacados = document.getElementById("destacados");
+  if (!window.getCatalogo) return;
+  var productos = getCatalogo().slice(0, 3);
+  destacados.innerHTML = productos.map(function (p) {
+    return `<div class="col-md-4 mb-4">
+          <div class="card h-100">
+            <img src="${p.imagen}" class="card-img-top" alt="${p.nombre}">
+            <div class="card-body text-center">
+              <h5 class="card-title">${p.nombre}</h5>
+              <p class="card-text">${p.categoria ? CATEGORIES[p.categoria].label : ''}</p>
+              <p class="texto-esmeralda fw-bold">${formatCLP ? formatCLP(p.precio) : ('$' + p.precio)}</p>
+              <a href="productos.html" class="btn btn-outline-primary">Ver Detalles</a>
+            </div>
+          </div>
+        </div>`;
+  }).join("");
+});

@@ -2,6 +2,7 @@
       var LS_USERS = "demo.users";
       var LS_SESSION = "demo.session";
 
+      // Funcion para leer del localStorage
       function leerLS(clave, defecto) {
         var raw = localStorage.getItem(clave);
         if (!raw) {
@@ -13,18 +14,23 @@
           return defecto;
         }
       }
+
+      // Funcion que escribe en localStorage
       function escribirLS(clave, valor) {
         localStorage.setItem(clave, JSON.stringify(valor));
       }
 
+      // Funcion para obtener el array de usuarios
       function getUsers() {
         return leerLS(LS_USERS, []);
       }
+
+      // Funcion para guardar el array de usuarios
       function saveUsers(arr) {
         escribirLS(LS_USERS, arr);
       }
 
-      // Regiones/Comunas
+      // Declaración de variable con datos de regiones y comunas
       var DATA_RC = {
         "Región Metropolitana de Santiago": [
           "Santiago",
@@ -49,6 +55,7 @@
         "Región de Ñuble": ["Chillán", "San Carlos", "Coihueco"],
       };
 
+      // Funcion para cargar regiones
       function cargarRegiones() {
         var selR = document.getElementById("selRegion");
         var region;
@@ -60,6 +67,7 @@
         }
       }
 
+      // Funcion para cargar comunas según región seleccionada
       function cargarComunas() {
         var selR = document.getElementById("selRegion");
         var selC = document.getElementById("selComuna");
@@ -78,12 +86,14 @@
         }
       }
 
-      // ==== Registro ====
+
+      // Funcion para registrar un nuevo usuario
       function registrarUsuario() {
         // Limpiar errores previos
         limpiarErrores();
         
         var nombre = document.getElementById("txtNombre").value.trim();
+        var rut = document.getElementById("txtRut").value.trim();
         var email = document
           .getElementById("txtEmail")
           .value.trim()
@@ -95,7 +105,7 @@
         var comuna = document.getElementById("selComuna").value;
 
         // Validar campos obligatorios
-        if (!nombre || !email || !pass1 || !pass2 || !region || !comuna) {
+        if (!nombre || !rut || !email || !pass1 || !pass2 || !region || !comuna) {
           Swal.fire(
             "Campos incompletos",
             "Por favor completa los campos obligatorios",
@@ -106,6 +116,11 @@
 
         // Validar nombre
         if (!validarNombre(nombre)) {
+          return false;
+        }
+
+        // Validar RUT
+        if (!validarRut(rut)) {
           return false;
         }
 
@@ -141,6 +156,7 @@
         // Guardar usuario (rol por defecto: user)
         users.push({
           name: nombre,
+          rut: rut,
           email: email,
           pass: pass1,
           role: "user",
@@ -162,8 +178,7 @@
         return false;
       }
 
-      // ==== FUNCIONES DE VALIDACIÓN ====
-      
+      // Funcion para validar el nombre
       function validarNombre(nombre) {
         var nombreInput = document.getElementById("txtNombre");
         
@@ -188,6 +203,7 @@
         return true;
       }
 
+      // Funcion para validar el correo
       function validarCorreo(email) {
         var emailInput = document.getElementById("txtEmail");
         
@@ -230,6 +246,7 @@
         return true;
       }
 
+      // Funcion para validar las contraseñas
       function validarContrasenas(pass1, pass2) {
         var pass1Input = document.getElementById("txtPass1");
         var pass2Input = document.getElementById("txtPass2");
@@ -262,6 +279,7 @@
         return true;
       }
 
+      // Funcion para validar el teléfono
       function validarTelefono(telefono) {
         var telefonoInput = document.getElementById("txtTelefono");
         
@@ -276,6 +294,53 @@
         return true;
       }
 
+      // Funcion para validar el RUT
+      function validarRut(rut) {
+        var rutInput = document.getElementById("txtRut");
+        
+        if (!rut) {
+          mostrarError(rutInput, "El RUT es obligatorio");
+          return false;
+        }
+
+        // Limpiar el RUT de puntos y guión
+        rut = rut.replace(/\./g, "").replace(/-/g, "").trim();
+        
+        // Validar largo
+        if (rut.length < 8 || rut.length > 9) {
+          mostrarError(rutInput, "El RUT debe tener entre 8 y 9 dígitos");
+          return false;
+        }
+
+        // Obtener dígito verificador
+        var dv = rut.slice(-1).toUpperCase();
+        var rutNumero = parseInt(rut.slice(0, -1));
+        
+        // Calcular dígito verificador
+        var suma = 0;
+        var factor = 2;
+        
+        while (rutNumero > 0) {
+          suma += (rutNumero % 10) * factor;
+          rutNumero = Math.floor(rutNumero / 10);
+          factor = factor === 7 ? 2 : factor + 1;
+        }
+        
+        var dvEsperado = 11 - (suma % 11);
+        if (dvEsperado === 11) dvEsperado = "0";
+        if (dvEsperado === 10) dvEsperado = "K";
+        else dvEsperado = dvEsperado.toString();
+
+        if (dv !== dvEsperado) {
+          mostrarError(rutInput, "El RUT no es válido");
+          return false;
+        }
+
+        limpiarError(rutInput);
+        return true;
+      }
+
+      // Funcion para mostrar errores en los campos
       function mostrarError(input, mensaje) {
         input.classList.add('is-invalid');
         
@@ -289,6 +354,7 @@
         errorElement.textContent = mensaje;
       }
 
+      // Funcion para limpiar errores de los campos
       function limpiarError(input) {
         input.classList.remove('is-invalid');
         var errorElement = input.parentNode.querySelector('.invalid-feedback');
@@ -297,6 +363,7 @@
         }
       }
 
+      // Funcion para limpiar todos los errores del formulario
       function limpiarErrores() {
         var inputs = document.querySelectorAll('.form-control');
         inputs.forEach(function(input) {

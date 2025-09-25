@@ -1,3 +1,19 @@
+/* Ajuste para cards de productos destacados en home.html */
+#destacados .card {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+#destacados .card-img-top {
+  height: 220px;
+  object-fit: cover;
+}
+#destacados .card-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 body {
   font-family: 'Montserrat', sans-serif;
   background-color: #F7F7F7;
@@ -28,6 +44,17 @@ h1, h2, h3, .navbar-brand {
 .btn-primary {
   background-color: #2E8B57;
   border-color: #2E8B57;
+}
+
+.btn-outline-primary {
+  color: #2E8B57;
+  border-color: #2E8B57;
+}
+
+.btn-outline-primary:hover {
+  background-color: #2E8B57;
+  border-color: #2E8B57;
+  color: white;
 }
 
 .btn-primary:hover {

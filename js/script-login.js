@@ -1,5 +1,9 @@
+// Declaracion de constantes para localStorage
+
 var LS_USERS = "demo.users";
 var LS_SESSION = "demo.session";
+
+// Funcion para leer del localStorage
 
 function leerLS(clave, defecto) {
   var raw = localStorage.getItem(clave);
@@ -12,52 +16,66 @@ function leerLS(clave, defecto) {
     return defecto;
   }
 }
+
+// Funcion para escribir en el localStorage
 function escribirLS(clave, valor) {
   localStorage.setItem(clave, JSON.stringify(valor));
 }
 
+// Funcion para obtener el array de usuarios
 function getUsers() {
   return leerLS(LS_USERS, []);
 }
 
+// Funcion para guardar el array de usuarios
 function saveUsers(arr) {
   escribirLS(LS_USERS, arr);
 }
 
+// Funcion para obtener la sesión actual
 function getSession() {
   return leerLS(LS_SESSION, null);
 }
+
+// Funcion para guardar la sesión actual
 function setSession(obj) {
   escribirLS(LS_SESSION, obj);
 }
+
+// Funcion para borrar la sesión actual
 function clearSession() {
   localStorage.removeItem(LS_SESSION);
 }
 
+// Funcion para inicializar datos de prueba
 function seed() {
-  // Limpiar los usuarios que ya existen en el localstorage
-  localStorage.removeItem(LS_USERS);
-
-  var users = [];
+  // Obtener usuarios existentes, si no hay, crear array vacío
+  var users = getUsers();
+  
+  // Si ya hay usuarios, no hacer nada
+  if (users.length > 0) {
+    return;
+  }
+  
+  // Si no hay usuarios, agregar los de prueba
   // Admin de ejemplo
   users.push({
     email: "juanito@duoc.cl",
     pass: "1234",
-    role: "admin",
-    rut: "123456785",
+    role: "admin"
   });
   // Usuario normal
   users.push({
     email: "maria@duoc.cl",
     pass: "abcd",
-    role: "user",
-    rut: "111111111",
+    role: "user"
   });
   saveUsers(users);
 }
 
 // Validaciones
 
+// Funcion que valida todo el formulario
 function validarTodo() {
   // Limpiar errores previos
   limpiarErrores();
@@ -80,19 +98,12 @@ function validarTodo() {
     return false;
   }
 
-  var rutInput = document.getElementById("txtRut").value;
-  if (rutInput) {
-    var okRut = validarRut();
-    if (okRut === false) {
-      return false;
-    }
-  }
-
   // Redirección al panel tras login correcto
   window.location.href = "panel.html"; // cambia si tu archivo se llama distinto
   return false; // evitar submit real
 }
 
+// Funcion que valida el correo
 function validarCorreo() {
   var correo = document.getElementById("txtEmail").value.trim();
   var emailInput = document.getElementById("txtEmail");
@@ -145,6 +156,7 @@ function validarCorreo() {
   return true;
 }
 
+// Funcion que valida la contraseña
 function validarContrasena() {
   var pass = document.getElementById("txtPass").value;
   var passInput = document.getElementById("txtPass");
@@ -170,16 +182,19 @@ function validarContrasena() {
   return true;
 }
 
+// Funcion que muestra un error en un input
 function mostrarError(input, errorElement, mensaje) {
   input.classList.add("is-invalid");
   errorElement.textContent = mensaje;
 }
 
+// Funcion que limpia el error de un input
 function limpiarError(input, errorElement) {
   input.classList.remove("is-invalid");
   errorElement.textContent = "";
 }
 
+// Funcion que limpia todos los errores del formulario
 function limpiarErrores() {
   var inputs = document.querySelectorAll(".form-control");
   var errors = document.querySelectorAll(".invalid-feedback");
@@ -193,8 +208,9 @@ function limpiarErrores() {
   });
 }
 
+// Funcion que valida el usuario contra la "base de datos"
 function validarUsuario() {
-  var correo = document.getElementById("txtEmail").value.trim();
+  var correo = document.getElementById("txtEmail").value.trim().toLowerCase();
   var pass = document.getElementById("txtPass").value;
 
   var users = getUsers();
@@ -235,46 +251,5 @@ function validarUsuario() {
   }
 }
 
-// Validación de rut
-function validarRut() {
-  var rut = document.getElementById("txtRut").value;
-  rut = rut.replace(/\./g, "").replace(/-/g, "");
-  var largo = rut.length;
-  if (largo != 9 && largo != 10) {
-    alert("rut incorrecto..");
-    return false;
-  }
-  if (largo == 9) {
-    rut = "0" + rut;
-  }
-
-  var factor = 3,
-    suma = 0,
-    index;
-  for (index = 0; index < 8; index++) {
-    var caracter = rut.slice(index, index + 1);
-    suma += caracter * factor;
-    factor--;
-    if (factor == 1) {
-      factor = 7;
-    }
-  }
-  var resto = suma % 11;
-  var dv = 11 - resto;
-  if (dv == 11) {
-    dv = 0;
-  }
-  if (dv > 9) {
-    dv = "K";
-  }
-
-  var dvUsuario = rut.slice(9, 10).toUpperCase();
-  if (dv == dvUsuario) {
-    return true;
-  } else {
-    alert("Rut Incorrecto...");
-    return false;
-  }
-}
-
+// Inicializar datos de prueba
 seed();
