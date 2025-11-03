@@ -110,6 +110,45 @@ function Nosotros(){
       </div>
     </div>
   </section>
+  <section className="py-5" id="sucursal-ubicacion">
+    <div className="container">
+      <h2 className="text-center mb-4 section-title">¡Visítanos en Santiago!</h2>
+      <p className="text-secondary text-center">Te invitamos a conocer nuestra sucursal en Santiago, un punto de encuentro con lo mejor de la cosecha local. </p>
+
+      <div className="row justify-content-center">
+        <div className="col-12 col-md-10">
+          <div className="card shadow-sm rounded-4 border-0">
+            <div className="card-body p-3">
+              <div className="row g-0 align-items-center">
+                <div className="col-12 col-md-8">
+                  <div className="ratio ratio-16x9">
+                    <iframe
+                      title="Mapa sucursal HuertoHogar"
+                      src="https://www.google.com/maps?q=-33.472500,-70.656000&z=15&output=embed"
+                      style={{ border: 0 }}
+                      allowFullScreen=""
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
+                </div>
+                <div className="col-12 col-md-4">
+                  <div className="p-3">
+                    <h5 className="mb-1">Sucursal Santiago Centro</h5>
+                    <p className="mb-1 text-secondary">Avenida Cordillera 1234, Santiago Centro</p>
+                    <p className="mb-0"><small className="text-muted">Horario: Lun–Vie 09:00–19:00 · Sáb 10:00–14:00</small></p>
+                    <div className="mt-3">
+                      <a href="https://www.google.com/maps/search/?api=1&query=-33.472500,-70.656000" target="_blank" rel="noreferrer" className="btn btn-sm btn-primary">¿Cómo llegar? 🚗</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
     </main>
     )
 }

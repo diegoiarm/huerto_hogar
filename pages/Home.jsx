@@ -18,10 +18,10 @@ function Home() {
                         Las mejores frutas y verduras al alcance de todos.
                     </p>
                     <div className="hero-buttons">
-                        <Button href="productos.html" variant="primary" size="lg" className="mx-2">
+                        <Button href="/productos" variant="primary" size="lg" className="mx-2">
                             Ver Productos
                         </Button>
-                        <Button href="registro.html" variant="outline-primary" size="lg" className="mx-2">
+                        <Button href="/registro" variant="outline-primary" size="lg" className="mx-2">
                             Únete Ahora
                         </Button>
                     </div>

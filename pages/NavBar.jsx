@@ -1,71 +1,69 @@
-import '../src/css/styles.css'
-import '../src/css/visual.css'
-import { Navbar, Nav, Container } from "react-bootstrap";
+import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { getSession, clearSession } from "../js/login.js";
 
 function NavBar() {
+  const session = getSession();
+
+  const handleLogout = () => {
+    clearSession();
+    window.location.reload();
+  };
+
   return (
-    <Navbar expand="lg">
-      <Container>
-        <Navbar.Brand href="#">
-          <img src="img/logo-blanco.png" alt="Huerto Hogar" height="60" />
+    <Navbar expand="lg" className="py-3">
+      <Container fluid className="px-5">
+        <Navbar.Brand as={Link} to="/">
+          <img src="/img/logo-blanco.png" alt="Huerto Hogar" height="60" />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="navbarNav" />
         <Navbar.Collapse id="navbarNav" className="justify-content-end">
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div
-            className="collapse navbar-collapse justify-content-end"
-            id="navbarNav"
-          >
-          <ul className="navbar-nav">
-            <li className="nav-item">
-              <a className="nav-link" href="/">
-                Inicio
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="productos.html">
-                Productos
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="nosotros">
-                Nosotros
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="blog">
-                Blog
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="contacto.html">
-                Contacto
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="login.html">
-                Login
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="registro.html">
-                Registrarse
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="carrito.html">
-                🛒
-              </a>
-            </li>
-          </ul>
-        </div>
+          <Nav>
+            <Nav.Link as={Link} to="/">
+              Inicio
+            </Nav.Link>
+            <Nav.Link as={Link} to="/productos">
+              Productos
+            </Nav.Link>
+            <Nav.Link as={Link} to="/nosotros">
+              Nosotros
+            </Nav.Link>
+            <Nav.Link as={Link} to="/blog">
+              Blog
+            </Nav.Link>
+            <Nav.Link as={Link} to="/contacto">
+              Contacto
+            </Nav.Link>
+            {/* si no hay sesión, muestra Login / Registro */}
+            {!session && (
+              <>
+                <Nav.Link as={Link} to="/login">
+                  Login
+                </Nav.Link>
+                <Nav.Link as={Link} to="/registro">
+                  Registrarse
+                </Nav.Link>
+              </>
+            )}
+
+            {/* carrito visible siempre */}
+            <Nav.Link as={Link} to="/carrito">
+              🛒
+            </Nav.Link>
+
+            {/* si hay sesión, muestra badge y botón logout */}
+            {session && (
+              <div className="d-flex align-items-center ms-lg-3">
+                <span className="badge bg-light text-dark me-2">
+                  {session.email} ({session.role})
+                </span>
+                <Button variant="primary" size="sm" onClick={handleLogout}>
+                  Cerrar sesión
+                </Button>
+              </div>
+            )}
+            
+          </Nav>
         </Navbar.Collapse>
       </Container>
     </Navbar>

@@ -1,9 +1,3 @@
-import '../src/css/styles.css';
-import '../src/css/visual.css';
-
-import React from 'react';
-import { Link } from 'react-router-dom'; 
-
 function Dato2(){
     return(
         <main className="dato2-main">

@@ -1,30 +1,29 @@
 function Footer() {
   return (
-    <footer class="py-4 text-center mt-5 footer-custom">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-4">
+    <footer className="py-4 text-center mt-5 footer-custom">
+      <div className="container">
+        <div className="row">
+          <div className="col-md-4">
             <h5>Contáctanos</h5>
-            <p class="mb-0">Email: info@huertohogar.cl</p>
-            <p class="mb-0">Teléfono: +56 9 1234 5678</p>
+            <p className="mb-0">Email: info@huertohogar.cl</p>
+            <p className="mb-0">Teléfono: +56 9 1234 5678</p>
           </div>
-          <div class="col-md-4">
+          <div className="col-md-4">
             <h5>Síguenos</h5>
-            <div class="social-links">
-              <a href="#" class="text-white text-decoration-none mx-2">
-                <i class="fab fa-facebook"></i>
+            <div className="social-links">
+              <a href="#" className="text-white text-decoration-none mx-2">
+                <i className="fab fa-facebook"></i>
               </a>
-              <a href="#" class="text-white text-decoration-none mx-2">
-                <i class="fab fa-instagram"></i>
+              <a href="#" className="text-white text-decoration-none mx-2">
+                <i className="fab fa-instagram"></i>
               </a>
-              <a href="#" class="text-white text-decoration-none mx-2">
-                <i class="fab fa-x"></i>
+              <a href="#" className="text-white text-decoration-none mx-2">
+                <i className="fab fa-twitter"></i>
               </a>
             </div>
           </div>
-          <div class="col-md-4">
-            <p class="mb-0">© 2025 HUERTO HOGAR</p>
-            <p class="mb-0">Todos los derechos reservados.</p>
+          <div className="col-md-4 mt-3">
+            <p>© 2025 HUERTO HOGAR<br />Todos los derechos reservados.</p>
           </div>
         </div>
       </div>
@@ -33,3 +32,4 @@ function Footer() {
 }
 
 export default Footer;
+
