@@ -1,260 +1,278 @@
-// Claves localStorage (mismas que en login.html)
-var LS_USERS = "demo.users";
-var LS_SESSION = "demo.session";
-var LS_NOTAS = "demo.notas";
+// SweetAlert2: usa NPM o CDN (si usas CDN, quita este import y agrega el <script> en index.html)
+import Swal from "sweetalert2";
 
-// Utilidades LS
+/* =========================
+   LocalStorage helpers
+   ========================= */
+const LS_USERS   = "demo.users";
+const LS_SESSION = "demo.session";
+const LS_NOTAS   = "demo.notas";
+
 function leerLS(clave, defecto) {
-  var raw = localStorage.getItem(clave);
-  if (!raw) { return defecto; }
-  try { return JSON.parse(raw); } catch (e) { return defecto; }
+  const raw = localStorage.getItem(clave);
+  if (!raw) return defecto;
+  try { return JSON.parse(raw); } catch (_) { return defecto; }
+}
+function escribirLS(clave, valor) {
+  localStorage.setItem(clave, JSON.stringify(valor));
 }
 
-// Funcion que escribe en localStorage
-function escribirLS(clave, valor) { localStorage.setItem(clave, JSON.stringify(valor)); }
+function getUsers()           { return leerLS(LS_USERS,   []); }
+function saveUsers(arr)       { escribirLS(LS_USERS, arr); }
+function getSession()         { return leerLS(LS_SESSION, null); }
+function setSession(obj)      { escribirLS(LS_SESSION, obj); }
+function clearSession()       { localStorage.removeItem(LS_SESSION); }
 
-// Funcion que obtiene el array de usuarios
-function getUsers() { return leerLS(LS_USERS, []); }
-
-// Funcion que guarda el array de usuarios
-function saveUsers(arr) { escribirLS(LS_USERS, arr); }
-
-// Funcion que obtiene la sesión actual
-function getSession() { return leerLS(LS_SESSION, null); }
-
-// Funcion que guarda la sesión actual
-function setSession(obj) { escribirLS(LS_SESSION, obj); }
-
-// Funcion que borra la sesión actual
-function clearSession() { localStorage.removeItem(LS_SESSION); }
-
-// Funcion para notas (demo)
 function getNotasDe(email) {
-  var mapa = leerLS(LS_NOTAS, {});
-  if (!mapa[email]) { mapa[email] = []; }
-  return mapa[email];
+  const mapa = leerLS(LS_NOTAS, {});
+  return mapa[email] || [];
 }
-
-// Funcion para guardar notas (demo)
 function saveNotasDe(email, notas) {
-  var mapa = leerLS(LS_NOTAS, {});
+  const mapa = leerLS(LS_NOTAS, {});
   mapa[email] = notas;
   escribirLS(LS_NOTAS, mapa);
 }
 
-// Renderiza la vista según el rol
+/* =========================
+   Render y control de vistas
+   ========================= */
 function render() {
-  var sess = getSession();
-  var adminView = document.getElementById("adminView");
-  var userView = document.getElementById("userView");
-  var badge = document.getElementById("sessionBadge");
+  const sess = getSession();
+  const adminView = document.getElementById("adminView");
+  const userView  = document.getElementById("userView");
+  const badge     = document.getElementById("sessionBadge");
 
   if (!sess) {
-    // No logueado -> volver a login
-    window.location.href = "login.html";
+    // SPA: redirige a tu ruta de login
+    window.location.href = "/login";
     return;
   }
 
-  badge.textContent = sess.email + " (" + sess.role + ")";
+  if (badge) badge.textContent = `${sess.email} (${sess.role})`;
 
   if (sess.role === "admin") {
-    adminView.classList.remove("hidden");
-    userView.classList.add("hidden");
+    adminView && adminView.classList.remove("hidden");
+    userView && userView.classList.add("hidden");
     cargarTablaUsuarios();
   } else {
-    adminView.classList.add("hidden");
-    userView.classList.remove("hidden");
+    adminView && adminView.classList.add("hidden");
+    userView && userView.classList.remove("hidden");
     cargarNotas();
   }
 }
 
-// ---------- Funciones relacionadas a ADMIN ----------
-
+/* =========================
+   ADMIN
+   ========================= */
 function cargarTablaUsuarios() {
-  var tbody = document.getElementById("tblUsers");
+  const tbody = document.getElementById("tblUsers");
+  if (!tbody) return;
   tbody.innerHTML = "";
-  var users = getUsers();
-  var i;
-  for (i = 0; i < users.length; i++) {
-    var u = users[i];
-    var tr = document.createElement("tr");
-    tr.innerHTML =
-      "<td>" + u.email + "</td>" +
-      "<td><span class='badge " + (u.role === 'admin' ? 'bg-warning text-dark' : 'bg-secondary') + "'>" + u.role + "</span></td>" +
-      "<td class='text-end'>" +
-      "<div class='btn-group btn-group-sm' role='group'>" +
-      "<button class='btn btn-outline-success' onclick=\"setRole('" + u.email + "','admin')\">Hacer admin</button>" +
-      "<button class='btn btn-outline-primary' onclick=\"setRole('" + u.email + "','user')\">Hacer user</button>" +
-      "<button class='btn btn-outline-danger' onclick=\"borrarUsuario('" + u.email + "')\">Eliminar</button>" +
-      "</div>" +
-      "</td>";
-    tbody.appendChild(tr);
-  }
+
+  const users = getUsers();
   if (users.length === 0) {
-    var tr = document.createElement("tr");
+    const tr = document.createElement("tr");
     tr.innerHTML = "<td colspan='3' class='text-secondary'>No hay usuarios.</td>";
     tbody.appendChild(tr);
+    return;
   }
+
+  users.forEach((u) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${u.email}</td>
+      <td>
+        <span class="badge ${u.role === "admin" ? "bg-warning text-dark" : "bg-secondary"}">
+          ${u.role}
+        </span>
+      </td>
+      <td class="text-end">
+        <div class="btn-group btn-group-sm" role="group">
+          <button class="btn btn-outline-success">Hacer admin</button>
+          <button class="btn btn-outline-primary">Hacer user</button>
+          <button class="btn btn-outline-danger">Eliminar</button>
+        </div>
+      </td>
+    `;
+
+    const [btnAdmin, btnUser, btnDelete] = tr.querySelectorAll("button");
+    btnAdmin.addEventListener("click", () => setRole(u.email, "admin"));
+    btnUser .addEventListener("click", () => setRole(u.email, "user"));
+    btnDelete.addEventListener("click", () => borrarUsuario(u.email));
+
+    tbody.appendChild(tr);
+  });
 }
 
-// Funcion para cambiar el rol de un usuario
+function esAdminActual() {
+  const sess = getSession();
+  return !!(sess && sess.role === "admin");
+}
 
 function setRole(email, role) {
   if (!esAdminActual()) { Swal.fire("No autorizado", "", "error"); return; }
-  var users = getUsers();
-  var i, cambiado = false;
-  for (i = 0; i < users.length; i++) {
+  const users = getUsers();
+  let cambiado = false;
+
+  for (let i = 0; i < users.length; i++) {
     if (users[i].email === email) {
       users[i].role = role;
       cambiado = true;
       break;
     }
   }
+
   if (cambiado) {
     saveUsers(users);
-    var sess = getSession();
-    if (sess && sess.email === email) { sess.role = role; setSession(sess); }
+    const sess = getSession();
+    if (sess && sess.email === email) {
+      sess.role = role;
+      setSession(sess);
+    }
     Swal.fire("OK", "Rol actualizado", "success");
     render();
   }
 }
 
-// Funcion para borrar un usuario
-
-function borrarUsuario(email) {
-  if (!esAdminActual()) { Swal.fire("No autorizado", "", "error"); return; }
-  Swal.fire({
-    title: "Eliminar usuario",
-    text: "Esta acción es permanente",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Eliminar",
-    cancelButtonText: "Cancelar"
-  }).then(function (res) {
-    if (!res.isConfirmed) { return; }
-    var users = getUsers();
-    var i, nuevos = [];
-    for (i = 0; i < users.length; i++) {
-      if (users[i].email !== email) { nuevos.push(users[i]); }
-    }
-    saveUsers(nuevos);
-    var sess = getSession();
-    if (sess && sess.email === email) { clearSession(); }
-    Swal.fire("Hecho", "Usuario eliminado", "success");
-    render();
-  });
-}
-
-// Funcion que indica si la sesión actual es admin
-function esAdminActual() {
-  var sess = getSession();
-  return !!(sess && sess.role === "admin");
-}
-
-
-// Funcion para validar la contraseña
 function validarPassword(pass) {
-  if (!pass) {
-    return {
-      valido: false,
-      mensaje: "La contraseña es obligatoria"
-    };
-  }
-  if (pass.length < 4 || pass.length > 10) {
-    return {
-      valido: false,
-      mensaje: "La contraseña debe tener entre 4 y 10 caracteres"
-    };
-  }
-  return {
-    valido: true
-  };
+  if (!pass) return { valido: false, mensaje: "La contraseña es obligatoria" };
+  if (pass.length < 4 || pass.length > 10)
+    return { valido: false, mensaje: "La contraseña debe tener entre 4 y 10 caracteres" };
+  return { valido: true };
 }
 
-// Funcion para crear un nuevo usuario (ADMIN)
 function crearUsuarioDemo() {
   if (!esAdminActual()) { Swal.fire("No autorizado", "", "error"); return; }
-  var email = document.getElementById("nuEmail").value.trim();
-  var pass = document.getElementById("nuPass").value.trim();
-  var role = document.getElementById("nuRole").value;
+  const email = document.getElementById("nuEmail")?.value.trim();
+  const pass  = document.getElementById("nuPass")?.value.trim();
+  const role  = document.getElementById("nuRole")?.value || "user";
 
   if (!email) {
     Swal.fire("Faltan datos", "El email es obligatorio", "warning");
     return;
   }
 
-  // Validar contraseña
-  var validacionPass = validarPassword(pass);
-  if (!validacionPass.valido) {
-    Swal.fire("Error de validación", validacionPass.mensaje, "warning");
+  const vp = validarPassword(pass);
+  if (!vp.valido) {
+    Swal.fire("Error de validación", vp.mensaje, "warning");
     return;
   }
-  var users = getUsers();
-  var i, yaExiste = false;
-  for (i = 0; i < users.length; i++) {
-    if (users[i].email === email) { yaExiste = true; break; }
-  }
+
+  const users = getUsers();
+  const yaExiste = users.some((u) => u.email === email);
   if (yaExiste) {
     Swal.fire("Error", "Ya existe un usuario con ese email", "error");
     return;
   }
-  users.push({ email: email, pass: pass, role: role });
+
+  users.push({ email, pass, role });
   saveUsers(users);
-  document.getElementById("nuEmail").value = "";
-  document.getElementById("nuPass").value = "";
-  document.getElementById("nuRole").value = "user";
+
+  const nuEmail = document.getElementById("nuEmail");
+  const nuPass  = document.getElementById("nuPass");
+  const nuRole  = document.getElementById("nuRole");
+  if (nuEmail) nuEmail.value = "";
+  if (nuPass)  nuPass.value  = "";
+  if (nuRole)  nuRole.value  = "user";
+
   Swal.fire("OK", "Usuario creado", "success");
   render();
 }
 
-// ---------- Acciones USUARIO ----------
+function borrarUsuario(email) {
+  if (!esAdminActual()) { Swal.fire("No autorizado", "", "error"); return; }
 
-// Funcion para agregar una nota (demo)
+  Swal.fire({
+    title: "Eliminar usuario",
+    text: "Esta acción es permanente",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Eliminar",
+    cancelButtonText: "Cancelar",
+  }).then((res) => {
+    if (!res.isConfirmed) return;
 
+    const users = getUsers().filter((u) => u.email !== email);
+    saveUsers(users);
+
+    const sess = getSession();
+    if (sess && sess.email === email) clearSession();
+
+    Swal.fire("Hecho", "Usuario eliminado", "success");
+    render();
+  });
+}
+
+/* =========================
+   USUARIO (Notas demo)
+   ========================= */
 function agregarNota() {
-  var sess = getSession();
-  if (!sess) { return false; }
-  var txt = document.getElementById("txtNota");
-  var valor = txt.value.trim();
-  if (!valor) { return false; }
-  var notas = getNotasDe(sess.email);
+  const sess = getSession();
+  if (!sess) return false;
+
+  const txt = document.getElementById("txtNota");
+  const valor = txt?.value.trim();
+  if (!valor) return false;
+
+  const notas = getNotasDe(sess.email);
   notas.push(valor);
   saveNotasDe(sess.email, notas);
-  txt.value = "";
+
+  if (txt) txt.value = "";
   cargarNotas();
   return false;
 }
 
-// Funcion para cargar las notas (demo)
-
 function cargarNotas() {
-  var sess = getSession();
-  if (!sess) { return; }
-  var ul = document.getElementById("listaNotas");
+  const sess = getSession();
+  if (!sess) return;
+
+  const ul = document.getElementById("listaNotas");
+  if (!ul) return;
+
   ul.innerHTML = "";
-  var notas = getNotasDe(sess.email);
-  var i;
-  for (i = 0; i < notas.length; i++) {
-    var li = document.createElement("li");
-    li.textContent = "• " + notas[i];
-    ul.appendChild(li);
-  }
+  const notas = getNotasDe(sess.email);
+
   if (notas.length === 0) {
-    var li = document.createElement("li");
+    const li = document.createElement("li");
     li.className = "text-secondary";
     li.textContent = "Aún no tienes notas.";
     ul.appendChild(li);
+    return;
   }
-}
 
-// Funcion para cerrar sesión
-
-function logout() {
-  clearSession();
-  Swal.fire("Sesión cerrada", "", "info").then(function () {
-    window.location.href = "login.html";
+  notas.forEach((n) => {
+    const li = document.createElement("li");
+    li.textContent = `• ${n}`;
+    ul.appendChild(li);
   });
 }
 
-// Inicio
-render();
+/* =========================
+   Logout
+   ========================= */
+function logout() {
+  clearSession();
+  Swal.fire("Sesión cerrada", "", "info").then(() => {
+    window.location.href = "/login"; // SPA
+  });
+}
+
+/* =========================
+   Init para React
+   ========================= */
+export function initPanelPage() {
+  // Listeners de botones y formularios que en HTML eran onclick/onsubmit
+  const btnCrear = document.getElementById("btnCrearUsuario");
+  if (btnCrear) btnCrear.addEventListener("click", crearUsuarioDemo);
+
+  const frmNotas = document.getElementById("frmNotas");
+  if (frmNotas) frmNotas.addEventListener("submit", (e) => {
+    e.preventDefault();
+    agregarNota();
+  });
+
+
+  // primer render (decide admin vs user)
+  render();
+}
