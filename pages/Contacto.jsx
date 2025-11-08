@@ -27,7 +27,8 @@ const Contacto = () => {
           <Col md={8} lg={6}>
             <Card className="shadow-sm px-4 py-5">
               <Form noValidate onSubmit={onSubmit}>
-                <Form.Group className="mb-3">
+                
+                <Form.Group className="mb-3" controlId="contact-nombre">
                   <Form.Label>Nombre completo</Form.Label>
                   <Form.Control
                     type="text"
@@ -43,7 +44,7 @@ const Contacto = () => {
                   </Form.Control.Feedback>
                 </Form.Group>
 
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="contact-email">
                   <Form.Label>Correo electrónico</Form.Label>
                   <Form.Control
                     type="email"
@@ -59,7 +60,7 @@ const Contacto = () => {
                   </Form.Control.Feedback>
                 </Form.Group>
 
-                <Form.Group className="mb-4">
+                <Form.Group className="mb-4" controlId="contact-mensaje">
                   <Form.Label>Mensaje</Form.Label>
                   <Form.Control
                     as="textarea"

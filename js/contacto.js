@@ -1,4 +1,7 @@
 // --- Validaciones y lógica del formulario ---
+
+// Validar el formato del email y dominios permitidos
+
 export const validateEmail = (email) => {
     const validDomains = ['duoc.cl', 'profesor.duoc.cl', 'gmail.com'];
     if (!email) return true; // El email es opcional según las reglas originales
@@ -8,6 +11,8 @@ export const validateEmail = (email) => {
 
     return validDomains.some(domain => email.endsWith('@' + domain));
 };
+
+// Validar los datos del formulario
 
 export const validateFormData = (formData) => {
     const errors = {};
@@ -36,14 +41,17 @@ export const validateFormData = (formData) => {
     return errors;
 };
 
-// --- Estado inicial del formulario ---
+// Estado inicial del formulario
 export const initialFormState = {
     nombre: '',
     email: '',
     mensaje: ''
 };
 
-// --- Manejadores de eventos ---
+// =============== Manejo de eventos del formulario ===============
+
+// Manejar el envío del formulario
+
 export const handleFormSubmit = (e, formData, setFormData, setErrors, setValidated) => {
     e.preventDefault();
     setValidated(true);
@@ -52,7 +60,6 @@ export const handleFormSubmit = (e, formData, setFormData, setErrors, setValidat
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-        // Aquí podrías agregar la lógica para enviar el formulario a un servidor
         alert('Tu mensaje se ha enviado correctamente');
         setFormData(initialFormState);
         setValidated(false);
@@ -61,6 +68,8 @@ export const handleFormSubmit = (e, formData, setFormData, setErrors, setValidat
     }
     return false;
 };
+
+// Manejar cambios en los campos del formulario
 
 export const handleInputChange = (e, formData, setFormData, validated, setErrors) => {
     const { name, value } = e.target;
@@ -71,7 +80,7 @@ export const handleInputChange = (e, formData, setFormData, validated, setErrors
     
     setFormData(newFormData);
     
-    // Si el formulario ya fue validado una vez, validamos en tiempo real
+    // Si el formulario ya ha sido validado, revalidar los datos
     if (validated) {
         setErrors(validateFormData(newFormData));
     }

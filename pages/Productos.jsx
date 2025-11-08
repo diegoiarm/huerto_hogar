@@ -30,10 +30,17 @@ const Productos = () => {
       */}
       <style>
         {`
-          .producto-card img {
-            object-fit: cover;
-            height: 160px;
+          .producto-card {
+            height: 200px;
             width: 100%;
+            object-fit: cover;
+            display: block;
+          }
+          .card-img-top.producto-card {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+            display: block;
           }
         `}
       </style>
@@ -91,6 +98,11 @@ const Productos = () => {
                     />
                     <div className="card-body d-flex flex-column">
                       <h5 className="card-title">{producto.nombre}</h5>
+                      {producto.descripcion && (
+                        <p className="card-text text-muted small mb-2" style={{ fontSize: '0.875rem' }}>
+                          {producto.descripcion}
+                        </p>
+                      )}
                       <p className="card-text text-success fw-bold">
                         ${producto.precio.toLocaleString()}
                       </p>

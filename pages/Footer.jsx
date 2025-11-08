@@ -18,7 +18,7 @@ function Footer() {
                 <i className="fab fa-instagram"></i>
               </a>
               <a href="#" className="text-white text-decoration-none mx-2">
-                <i className="fab fa-twitter"></i>
+                <i className="fab fa-x-twitter"></i>
               </a>
             </div>
           </div>

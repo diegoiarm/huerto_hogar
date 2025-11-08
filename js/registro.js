@@ -1,10 +1,14 @@
+// Importar SweetAlert2 para mostrar alertas bonitas
+
 import Swal from "sweetalert2";
 
-// Claves usadas por el resto del sitio
+// Constantes de localStorage (usuarios y sesión)
+
 export const LS_USERS = "demo.users";
 export const LS_SESSION = "demo.session";
 
 // Funcion para leer del localStorage
+
 export function leerLS(clave, defecto) {
   const raw = localStorage.getItem(clave);
   if (!raw) return defecto;
@@ -16,21 +20,25 @@ export function leerLS(clave, defecto) {
 }
 
 // Funcion que escribe en localStorage
+
 export function escribirLS(clave, valor) {
   localStorage.setItem(clave, JSON.stringify(valor));
 }
 
 // Funcion para obtener el array de usuarios
+
 export function getUsers() {
   return leerLS(LS_USERS, []);
 }
 
 // Funcion para guardar el array de usuarios
+
 export function saveUsers(arr) {
   escribirLS(LS_USERS, arr);
 }
 
 // Declaración de variable con datos de regiones y comunas
+
 const DATA_RC = {
   "Región Metropolitana de Santiago": [
     "Santiago", "Ñuñoa", "Providencia", "Las Condes", "Maipú",
@@ -43,7 +51,8 @@ const DATA_RC = {
   "Región de Ñuble": ["Chillán", "San Carlos", "Coihueco"],
 };
 
-// ---- Carga de regiones/comunas
+// Cargar regiones en el select correspondiente
+
 function cargarRegiones() {
   const selR = document.getElementById("selRegion");
   if (!selR) return;
@@ -55,6 +64,8 @@ function cargarRegiones() {
     selR.appendChild(opt);
   }
 }
+
+// Cargar comunas según región seleccionada
 
 function cargarComunas() {
   const selR = document.getElementById("selRegion");
@@ -74,14 +85,16 @@ function cargarComunas() {
   }
 }
 
-// expuesto para React: llama en useEffect
+// Exportar función para inicializar la página de registro
+
 export function initRegistroPage() {
   cargarRegiones();
   const selR = document.getElementById("selRegion");
   if (selR) selR.addEventListener("change", cargarComunas);
 }
 
-// ---- Validaciones y helpers UI
+// Función para mostrar un error en un campo
+
 function mostrarError(input, mensaje) {
   if (!input) return;
   input.classList.add("is-invalid");
@@ -94,6 +107,8 @@ function mostrarError(input, mensaje) {
   errorElement.textContent = mensaje;
 }
 
+// Función para limpiar el error de un campo
+
 function limpiarError(input) {
   if (!input) return;
   input.classList.remove("is-invalid");
@@ -101,12 +116,15 @@ function limpiarError(input) {
   if (errorElement) errorElement.textContent = "";
 }
 
+// Función para limpiar todos los errores del formulario
+
 function limpiarErrores() {
   const inputs = document.querySelectorAll(".form-control");
   inputs.forEach((input) => limpiarError(input));
 }
 
 // Funcion para validar el nombre
+
 function validarNombre(nombre) {
   const nombreInput = document.getElementById("txtNombre");
   if (nombre.length < 2) {
@@ -127,6 +145,7 @@ function validarNombre(nombre) {
 }
 
 // Funcion para validar el correo
+
 function validarCorreo(email) {
   const emailInput = document.getElementById("txtEmail");
   if (!email) {
@@ -158,6 +177,7 @@ function validarCorreo(email) {
 }
 
 // Funcion para validar las contraseñas
+
 function validarContrasenas(pass1, pass2) {
   const pass1Input = document.getElementById("txtPass1");
   const pass2Input = document.getElementById("txtPass2");
@@ -183,6 +203,7 @@ function validarContrasenas(pass1, pass2) {
 }
 
 // Funcion para validar el teléfono
+
 function validarTelefono(telefono) {
   const telefonoInput = document.getElementById("txtTelefono");
   const telefonoRegex = /^(\+56\s?)?9\s?\d{4}\s?\d{4}$/;
@@ -197,7 +218,8 @@ function validarTelefono(telefono) {
   return true;
 }
 
-// Funcion para validar el RUT (módulo 11)
+// Funcion para validar el RUT
+
 function validarRut(rut) {
   const rutInput = document.getElementById("txtRut");
   if (!rut) {
@@ -231,7 +253,8 @@ function validarRut(rut) {
   return true;
 }
 
-// ---- Registrar usuario
+// Exportar la función para registrar un usuario
+
 export function registrarUsuario() {
   // Limpiar errores previos
   limpiarErrores();
@@ -283,7 +306,7 @@ export function registrarUsuario() {
     icon: "success",
     confirmButtonText: "Ir a login",
   }).then(function () {
-    // en React SPA redirige a la ruta:
+    // Redirigir a la página de login
     window.location.href = "/login";
   });
 

@@ -53,14 +53,23 @@ function NavBar() {
 
             {/* si hay sesión, muestra badge y botón logout */}
             {session && (
-              <div className="d-flex align-items-center ms-lg-3">
-                <span className="badge bg-light text-dark me-2">
-                  {session.email} ({session.role})
-                </span>
-                <Button variant="primary" size="sm" onClick={handleLogout}>
-                  Cerrar sesión
-                </Button>
-              </div>
+              <>
+                {/* Divisor visual para separar opciones de usuario */}
+                <div className="vr text-white d-none d-lg-block mx-3" style={{ height: '35px', opacity: 0.3 }}></div>
+                
+                {/* Sección de usuario */}
+                <div className="d-flex align-items-center ms-lg-3 gap-2">
+                  <Nav.Link as={Link} to="/panel" className="p-0">
+                    <i className="fas fa-user text-white" style={{ fontSize: '1.1rem', cursor: 'pointer' }}></i>
+                  </Nav.Link>
+                  <span className="badge bg-light text-dark">
+                    {session.email} ({session.role})
+                  </span>
+                  <Button variant="primary" size="sm" onClick={handleLogout}>
+                    Cerrar sesión
+                  </Button>
+                </div>
+              </>
             )}
             
           </Nav>

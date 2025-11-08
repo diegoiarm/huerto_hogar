@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@600&display=swap');
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
 
 /* Ajuste para cards de productos destacados en home.html */
 #destacados .card {
@@ -130,4 +129,307 @@ font-weight: 600;
 transition: all 0.3s ease;
 box-shadow: 0 4px 15px rgba(46, 139, 87, 0.3);
 }
+
+/* ==== Personalización de pestañas del panel ==== */
+.nav-tabs .nav-link.active {
+  background-color: #2E8B57;
+  color: white !important; /* texto blanco cuando está activa */
+  border-color: #2E8B57;
+}
+
+.nav-tabs .nav-link {
+  color: #555; /* color base del texto inactivo */
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* === HERO SECTION MEJORADO === */
+.hero-section {
+  padding: 4rem 0 !important;
+  overflow: hidden;
+  position: relative;
+  /* Mantiene el fondo original del body */
+}
+
+.hero-section .container {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-decorative-icons {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hero-icon {
+  position: absolute;
+  font-size: 6rem;
+  color: #2E8B57;
+  opacity: 0.2;
+  animation: float 4s ease-in-out infinite, zoomIn 1s ease forwards;
+  filter: blur(0.5px), brightness(1.2);
+  z-index: 0;
+  
+}
+
+.hero-icon-left {
+  left: 15%;
+  top: 40%;
+  animation-delay: 0s;
+}
+
+.hero-icon-right {
+  right: 2%;
+  top: 75%;
+  animation-delay: 2s;
+}
+
+/* Opción: Agregar más iconos decorativos */
+.hero-icon-center-left {
+  left: 2%;
+  top: 75%;
+  font-size: 5rem;
+  opacity: 0.2;
+  animation-delay: 1s;
+}
+
+.hero-icon-center-right {
+  right: 15%;
+  top: 40%;
+  font-size: 4rem;
+  opacity: 0.2;
+  animation-delay: 3s;
+}
+
+.hero-icon-top-left {
+  left: 5%;
+  top: 8%;
+  font-size: 3rem;
+  opacity: 0.2;
+  animation-delay: 0.5s;
+}
+
+.hero-icon-top-right {
+  right: 3%;
+  top: 10%;
+  font-size: 2rem;
+  opacity: 0.2;
+  animation-delay: 2.5s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  33% {
+    transform: translateY(-15px) rotate(3deg) scale(1.05);
+  }
+  66% {
+    transform: translateY(-25px) rotate(-2deg) scale(0.98);
+  }
+}
+
+.hero-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #2E8B57 0%, #3CB371 100%);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(46, 139, 87, 0.3);
+  animation: fadeInDown 0.8s ease-out;
+  z-index: 1;
+  position: relative;
+}
+
+.hero-title-wrapper {
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-main-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-greeting {
+  font-size: 1.5rem;
+  color: #8B4513;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.hero-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0.5rem 0;
+}
+
+.hero-brand-text {
+  background: linear-gradient(135deg, #2E8B57 0%, #3CB371 50%, #2E8B57 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 4rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  animation: gradientShift 3s ease infinite;
+  text-shadow: 0 4px 20px rgba(46, 139, 87, 0.2);
+}
+
+.hero-brand-accent {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 4rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  animation: gradientShift 3s ease infinite;
+  animation-delay: 0.5s;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.hero-decoration-line {
+  width: 150px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #2E8B57, transparent);
+  margin: 1.5rem auto;
+  border-radius: 2px;
+  animation: expandLine 1s ease-out 0.5s both;
+}
+
+@keyframes expandLine {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 150px;
+    opacity: 1;
+  }
+}
+
+.hero-subtitle {
+  animation: fadeInUp 1s ease-out 0.3s both;
+  font-size: 1.25rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-buttons {
+  animation: fadeInUp 1s ease-out 0.6s both;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-btn {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.hero-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(46, 139, 87, 0.4);
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-main-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-brand-text,
+  .hero-brand-accent {
+    font-size: 2.8rem;
+  }
+  
+  .hero-icon {
+    font-size: 2.5rem;
+  }
+  
+  .hero-icon-left {
+    left: 2%;
+  }
+  
+  .hero-icon-right {
+    right: 2%;
+  }
+  
+  .hero-icon-center-left,
+  .hero-icon-center-right {
+    font-size: 1.5rem;
+  }
+  
+  .hero-icon-top-left,
+  .hero-icon-top-right {
+    font-size: 1.2rem;
+  }
+  
+  .hero-buttons {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .hero-btn {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
 

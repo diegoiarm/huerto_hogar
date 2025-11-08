@@ -41,6 +41,8 @@ const Carrito = () => {
     setCarrito(vaciarCarritoCompleto());
     setTotal(0);
     setDescuento(0);
+    // Limpiar cupón guardado
+    localStorage.removeItem('cuponAplicado');
   };
 
   const handleAplicarCupon = () => {
@@ -55,7 +57,7 @@ const Carrito = () => {
     }
     
     const resultado = aplicarDescuento(total, cupon);
-    if (resultado.total === total) {
+    if (typeof resultado === 'number' && resultado === total) {
       Swal.fire({
         icon: 'error',
         title: 'Cupón inválido',
@@ -65,8 +67,19 @@ const Carrito = () => {
       return;
     }
     
-    setDescuento(resultado.descuento);
-    setTotal(resultado.total);
+    if (typeof resultado === 'object' && resultado.descuento) {
+      setDescuento(resultado.descuento);
+      setTotal(resultado.total);
+      // Guardar el cupón en localStorage para usarlo en el formulario de dirección
+      localStorage.setItem('cuponAplicado', cupon.toUpperCase());
+      Swal.fire({
+        icon: 'success',
+        title: 'Cupón aplicado',
+        text: 'Descuento aplicado correctamente',
+        confirmButtonText: 'Aceptar',
+        timer: 2000
+      });
+    }
   };
 
   return (

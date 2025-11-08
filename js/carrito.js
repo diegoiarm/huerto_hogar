@@ -2,10 +2,10 @@
 const LS_CART = "cart.items"; // Mismo valor que en productos.js
 const LS_CUPONES = "cupones";
 
-// Importamos las constantes necesarias de productos.js
+// --- Importaciones ---
 import { getCatalogo } from './productos';
 
-// --- Interfaces y Tipos ---
+// --- Tipos de Datos ---
 /**
  * @typedef {Object} ProductoCarrito
  * @property {string} id - ID único del producto
@@ -17,7 +17,8 @@ import { getCatalogo } from './productos';
  * @property {string} categoria - Categoría del producto
  */
 
-// --- Gestión del Carrito ---
+// Función para obtener un producto del catálogo por su ID
+
 export const getCarrito = () => {
     try {
         return JSON.parse(localStorage.getItem(LS_CART)) || [];
@@ -27,6 +28,8 @@ export const getCarrito = () => {
     }
 };
 
+// Función para guardar el carrito en localStorage
+
 export const guardarCarrito = (carrito) => {
     try {
         localStorage.setItem(LS_CART, JSON.stringify(carrito));
@@ -35,6 +38,8 @@ export const guardarCarrito = (carrito) => {
     }
 };
 
+// Función para actualizar el carrito al agregar un producto
+
 export const actualizarCantidad = (carrito, index, nuevaCantidad) => {
     const nuevoCarrito = [...carrito];
     nuevoCarrito[index].cantidad = Math.max(1, nuevaCantidad);
@@ -42,35 +47,49 @@ export const actualizarCantidad = (carrito, index, nuevaCantidad) => {
     return nuevoCarrito;
 };
 
+// Función para eliminar un ítem del carrito
+
 export const eliminarItem = (carrito, index) => {
     const nuevoCarrito = carrito.filter((_, i) => i !== index);
     guardarCarrito(nuevoCarrito);
     return nuevoCarrito;
 };
 
+// Función para vaciar el carrito
+
 export const vaciarCarrito = () => {
     localStorage.removeItem(LS_CART);
     return [];
 };
 
-// --- Cálculos ---
+// Función para calcular el subtotal de un ítem
+
 export const calcularSubtotal = (precio, cantidad) => {
     return (precio * cantidad).toFixed(0);
 };
+
+// Función para calcular el total del carrito
 
 export const calcularTotal = (items) => {
     return items.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
 };
 
-// --- Gestión de Cupones ---
+// =================== Gestión de Cupones ===================
+
+// Definición de cupones disponibles
+
 const CUPONES = {
     'BIENVENIDA10': { descuento: 0.10, descripcion: 'Descuento de bienvenida 10%' },
     'HUERTO20': { descuento: 0.20, descripcion: 'Descuento especial 20%' }
 };
 
+// Función para validar un cupón
+
 export const validarCupon = (codigo) => {
     return CUPONES[codigo.toUpperCase()] || null;
 };
+
+// Función para aplicar un cupón al total del carrito
 
 export const aplicarDescuento = (total, codigoCupon) => {
     const cupon = validarCupon(codigoCupon);

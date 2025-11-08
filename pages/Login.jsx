@@ -1,10 +1,19 @@
 import { useEffect } from "react";
-import { initLoginPage, validarTodo } from "../js/login";
+import { useNavigate } from "react-router-dom";
+import { initLoginPage, validarTodo, getSession } from "../js/login";
 
 function Login() {
+  const navigate = useNavigate();
+  
   useEffect(() => {
+    // Verificar si ya hay una sesión activa
+    const session = getSession();
+    if (session) {
+      navigate('/panel');
+      return;
+    }
     initLoginPage();
-  }, []);
+  }, [navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

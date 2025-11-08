@@ -1,33 +1,57 @@
+// Importar SweetAlert2 para mostrar alertas bonitas
 import Swal from "sweetalert2";
 
+// Constantes de localStorage (usuarios y sesión)
 export const LS_USERS = "demo.users";
 export const LS_SESSION = "demo.session";
+
+// Lee en localStorage según clave
 
 export function leerLS(clave, defecto) {
   const raw = localStorage.getItem(clave);
   if (!raw) return defecto;
   try { return JSON.parse(raw); } catch (_) { return defecto; }
 }
+
+// Escribe en localStorage según clave
+
 export function escribirLS(clave, valor) {
   localStorage.setItem(clave, JSON.stringify(valor));
 }
+
+// ================== Gestión de usuarios y sesión ==================
+
+// Obtener usuarios de localStorage
+
 export function getUsers() {
   return leerLS(LS_USERS, []);
 }
+
+// Guardar usuarios en localStorage
+
 export function saveUsers(arr) {
   escribirLS(LS_USERS, arr);
 }
+
+// Obtener la sesión actual
+
 export function getSession() {
   return leerLS(LS_SESSION, null);
 }
+
+// Establecer la sesión actual
 export function setSession(obj) {
   escribirLS(LS_SESSION, obj);
 }
+
+// Eliminar o limpiar la sesión actual
+
 export function clearSession() {
   localStorage.removeItem(LS_SESSION);
 }
 
-// ---- datos demo
+// Datos demo de usuarios admin y user
+
 function seed() {
   const users = getUsers();
   if (users.length > 0) return;
@@ -37,17 +61,26 @@ function seed() {
   saveUsers(users);
 }
 
-// ---- Validaciones UI pequeñas
+// =============== Validaciones del formulario de login ===============
+
+// Función para mostrar errores 
+
 function mostrarError(input, errorElement, mensaje) {
   if (!input || !errorElement) return;
   input.classList.add("is-invalid");
   errorElement.textContent = mensaje;
 }
+
+// Función para limpiar errores
+
 function limpiarError(input, errorElement) {
   if (!input || !errorElement) return;
   input.classList.remove("is-invalid");
   errorElement.textContent = "";
 }
+
+// Función para limpiar todos los errores del formulario
+
 function limpiarErrores() {
   const inputs = document.querySelectorAll(".form-control");
   const errors = document.querySelectorAll(".invalid-feedback");
@@ -55,7 +88,8 @@ function limpiarErrores() {
   errors.forEach((e) => (e.textContent = ""));
 }
 
-// ---- Validar campos
+// Función para validar el correo electrónico
+
 function validarCorreo() {
   const correo = document.getElementById("txtEmail")?.value?.trim() || "";
   const emailInput = document.getElementById("txtEmail");
@@ -87,6 +121,8 @@ function validarCorreo() {
   return true;
 }
 
+// Función para validar la contraseña
+
 function validarContrasena() {
   const pass = document.getElementById("txtPass")?.value || "";
   const passInput = document.getElementById("txtPass");
@@ -104,7 +140,8 @@ function validarContrasena() {
   return true;
 }
 
-// ---- Validar usuario en localStorage
+// Función para validar que el usuario exista
+
 function validarUsuario() {
   const correo = document.getElementById("txtEmail")?.value?.trim().toLowerCase() || "";
   const pass   = document.getElementById("txtPass")?.value || "";
@@ -138,7 +175,8 @@ function validarUsuario() {
   }
 }
 
-// ---- Flujo completo
+// Función para validar todo el formulario de login
+
 export function validarTodo() {
   limpiarErrores();
 
@@ -152,6 +190,7 @@ export function validarTodo() {
   return false; 
 }
 
+// Inicializar la página de login
 
 export function initLoginPage() {
   seed();

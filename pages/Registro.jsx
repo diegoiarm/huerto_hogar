@@ -1,10 +1,20 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { initRegistroPage, registrarUsuario } from "../js/registro";
+import { getSession } from "../js/login";
 
 function Registro() {
+  const navigate = useNavigate();
+
   useEffect(() => {
+    // Verificar si ya hay una sesión activa
+    const session = getSession();
+    if (session) {
+      navigate('/panel');
+      return;
+    }
     initRegistroPage();
-  }, []);
+  }, [navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
