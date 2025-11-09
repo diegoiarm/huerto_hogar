@@ -4,7 +4,8 @@
 
 ## 🚀 Tecnologías utilizadas  
 - **HTML5**  
-- **CSS3** (con framework **Bootstrap**)  
+- **CSS3** (con framework **Bootstrap**)
+- **React**
 - **JavaScript**  
 
 ## 📌 Características principales  
