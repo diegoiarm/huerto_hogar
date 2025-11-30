@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  getCarrito, 
-  calcularTotal,
-  validarCupon
-} from "../js/carrito";
+import { createOrder } from "../src/api_rest";
+import Swal from "sweetalert2";
 
 function FormularioDireccion() {
   const [formData, setFormData] = useState({
@@ -30,22 +27,28 @@ function FormularioDireccion() {
 
   useEffect(() => {
     const cargarCarrito = () => {
-      const items = getCarrito();
+      const LS_CART = "cart.items";
+      let items = [];
+      try {
+        items = JSON.parse(localStorage.getItem(LS_CART) || "[]");
+      } catch (e) {
+        items = [];
+      }
       setCarrito(items);
       
-      const subtotalCalculado = calcularTotal(items);
+      const subtotalCalculado = items.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
       setSubtotal(subtotalCalculado);
 
-      // Verificar si hay un cupón guardado
+      // Verificar si hay un cupón guardado (lógica simplificada, idealmente validar con backend)
       const cuponGuardado = localStorage.getItem("cuponAplicado");
       let descuentoCalculado = 0;
-      const cuponInfo = cuponGuardado ? validarCupon(cuponGuardado) : null;
-
-      if (cuponInfo) {
-        descuentoCalculado = subtotalCalculado * cuponInfo.descuento;
-        setCuponAplicado({ codigo: cuponGuardado, ...cuponInfo });
+      
+      // Simulación de validación de cupón (puedes mover esto a una función o API)
+      if (cuponGuardado === "DESCUENTO10") {
+         descuentoCalculado = subtotalCalculado * 0.10;
+         setCuponAplicado({ codigo: cuponGuardado, descuento: 0.10 });
       } else {
-        setCuponAplicado(null);
+         setCuponAplicado(null);
       }
 
       setDescuento(descuentoCalculado);
@@ -61,20 +64,14 @@ function FormularioDireccion() {
 
     cargarCarrito();
     
-    // Escuchar cambios en el localStorage para actualizar el carrito
     const handleStorageChange = () => {
       cargarCarrito();
     };
     
     window.addEventListener('storage', handleStorageChange);
     
-    // También verificar periódicamente por si el carrito cambia en la misma pestaña
-    // Usamos un intervalo más largo para no sobrecargar el rendimiento
-    const interval = setInterval(cargarCarrito, 2000);
-    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
     };
   }, []);
 
@@ -143,42 +140,52 @@ function FormularioDireccion() {
     setErrors({});
   };
 
-  const enviarDatos = (e) => {
+  const enviarDatos = async (e) => {
     e.preventDefault();
 
     if (!validarFormulario()) {
       return;
     }
 
-    // Simulación aleatoria de resultado de compra (50% éxito, 50% fallo)
-    const compraExitosa = Math.random() > 0.5;
+    const detallesPedido = {
+      nombreCompleto: formData.nombreCompleto,
+      telefono: formData.telefono,
+      direccionCompleta: `${formData.direccion} ${formData.numeroDireccion}, ${formData.comuna}, ${formData.region}`,
+      comuna: formData.comuna,
+      region: formData.region,
+      codigoPostal: formData.codigoPostal,
+      tipoEntrega: formData.tipoEntrega,
+      notas: formData.notas,
+      subtotal: subtotal,
+      descuento: descuento,
+      iva: iva,
+      total: total,
+      detalles: carrito.map(item => ({
+        producto: { id: item.id },
+        cantidad: item.cantidad,
+        precioUnitario: item.precio,
+        totalLinea: item.precio * item.cantidad
+      }))
+    };
 
-    if (compraExitosa) {
-      // Guardar los detalles del pedido en localStorage
-      const detallesPedido = {
-        cliente: {
-          nombre: formData.nombreCompleto,
-          email: localStorage.getItem('userEmail') || 'No especificado',
-          direccion: `${formData.direccion} ${formData.numeroDireccion}, ${formData.comuna}, ${formData.region}`,
-          telefono: formData.telefono
-        },
-        productos: carrito.map(item => ({
-          nombre: item.nombre,
-          cantidad: item.cantidad,
-          precio: item.precio
-        })),
-        subtotal: subtotal,
-        descuento: descuento,
-        iva: iva,
-        total: total,
-        tipoEntrega: formData.tipoEntrega,
-        notas: formData.notas,
-        fecha: new Date().toISOString()
+    try {
+      await createOrder(detallesPedido);
+      
+      // Limpiar carrito y cupón
+      localStorage.removeItem("cart.items");
+      localStorage.removeItem("cuponAplicado");
+      
+      // Guardar objeto para mostrar en CompraExitosa (incluyendo nombres de productos)
+      const orderForDisplay = {
+        ...detallesPedido,
+        productos: carrito // Guardamos el carrito original que tiene nombres e imágenes
       };
+      
+      localStorage.setItem('lastOrder', JSON.stringify(orderForDisplay));
 
-      localStorage.setItem('lastOrder', JSON.stringify(detallesPedido));
       navigate("/compra-exitosa");
-    } else {
+    } catch (error) {
+      console.error("Error al crear la orden:", error);
       navigate("/compra-fallida");
     }
   };
@@ -397,6 +404,7 @@ function FormularioDireccion() {
                           objectFit: 'cover',
                           flexShrink: 0
                         }}
+                        onError={(e) => {e.target.src = 'https://via.placeholder.com/60'}}
                       />
                       <div className="flex-grow-1">
                         <h6 className="mb-1">{item.nombre}</h6>

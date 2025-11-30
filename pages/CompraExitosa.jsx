@@ -62,10 +62,10 @@ function CompraExitosa() {
             <>
               <div className="mb-4">
                 <h5 className="border-bottom pb-2">Datos del cliente</h5>
-                <p className="mb-1"><strong>Nombre:</strong> {orderDetails.cliente.nombre}</p>
-                <p className="mb-1"><strong>Email:</strong> {orderDetails.cliente.email}</p>
-                <p className="mb-1"><strong>Dirección:</strong> {orderDetails.cliente.direccion}</p>
-                <p className="mb-1"><strong>Teléfono:</strong> {orderDetails.cliente.telefono}</p>
+                <p className="mb-1"><strong>Nombre:</strong> {orderDetails.nombreCompleto}</p>
+                <p className="mb-1"><strong>Email:</strong> {localStorage.getItem('userEmail') || 'No especificado'}</p>
+                <p className="mb-1"><strong>Dirección:</strong> {orderDetails.direccionCompleta}</p>
+                <p className="mb-1"><strong>Teléfono:</strong> {orderDetails.telefono}</p>
               </div>
 
               <div className="mb-4">

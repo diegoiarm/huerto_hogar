@@ -1,23 +1,41 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { initLoginPage, validarTodo, getSession } from "../js/login";
+import { login } from "../src/api_rest";
 
 function Login() {
   const navigate = useNavigate();
-  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    // Verificar si ya hay una sesión activa
-    const session = getSession();
-    if (session) {
-      navigate('/panel');
-      return;
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/panel");
     }
-    initLoginPage();
   }, [navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    validarTodo(); 
+    setError("");
+
+    try {
+      const response = await login({ email, password });
+      // Asumiendo que el backend devuelve el token en response.data.token o similar
+      // Ajustar según la respuesta real del backend.
+      // Si el backend devuelve el token directamente o en un objeto
+      const token = response.data.token || response.data; 
+      
+      localStorage.setItem("token", token);
+      // Guardar usuario si viene en la respuesta, opcional
+      // localStorage.setItem("user", JSON.stringify(response.data.user));
+      
+      window.dispatchEvent(new Event("authChange"));
+      navigate("/panel");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Credenciales inválidas o error en el servidor.");
+    }
   };
 
   return (
@@ -25,10 +43,12 @@ function Login() {
       <section className="section-bg mx-auto" style={{ maxWidth: 560 }}>
         <h1 className="h3 text-center mb-3">Iniciar sesión</h1>
         <p className="text-secondary text-center mb-4">
-          Accede con tu correo y contraseña. Si tus credenciales son de administrador, verás el panel correspondiente.
+          Accede con tu correo y contraseña.
         </p>
 
-        <form id="frmLogin" onSubmit={handleSubmit} noValidate>
+        {error && <div className="alert alert-danger">{error}</div>}
+
+        <form id="frmLogin" onSubmit={handleSubmit}>
           <div className="mb-3">
             <label htmlFor="txtEmail" className="form-label">Email</label>
             <input
@@ -38,9 +58,9 @@ function Login() {
               name="txtEmail"
               placeholder="ej: juanito@duoc.cl"
               required
-              maxLength={100}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
-            <div className="invalid-feedback" id="emailError"></div>
           </div>
 
           <div className="mb-3">
@@ -52,10 +72,9 @@ function Login() {
               name="txtPass"
               placeholder="tu contraseña"
               required
-              minLength={4}
-              maxLength={10}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
-            <div className="invalid-feedback" id="passError"></div>
           </div>
 
           <button type="submit" className="btn btn-primary w-100">Entrar</button>

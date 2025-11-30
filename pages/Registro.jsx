@@ -1,24 +1,107 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { initRegistroPage, registrarUsuario } from "../js/registro";
-import { getSession } from "../js/login";
+import { register } from "../src/api_rest";
+import Swal from "sweetalert2";
+
+const DATA_RC = {
+  "Región Metropolitana de Santiago": [
+    "Santiago", "Ñuñoa", "Providencia", "Las Condes", "Maipú",
+  ],
+  "Región del Biobío": [
+    "Concepción", "Talcahuano", "San Pedro de la Paz", "Chiguayante",
+  ],
+  "Región del Maule": ["Linares", "Longaví", "Talca", "Curicó"],
+  "Región de La Araucanía": ["Temuco", "Padre Las Casas", "Villarrica", "Angol"],
+  "Región de Ñuble": ["Chillán", "San Carlos", "Coihueco"],
+};
 
 function Registro() {
   const navigate = useNavigate();
+  
+  const [formData, setFormData] = useState({
+    nombre: "",
+    rut: "",
+    email: "",
+    pass1: "",
+    pass2: "",
+    telefono: "",
+    region: "",
+    comuna: ""
+  });
+
+  const [comunas, setComunas] = useState([]);
 
   useEffect(() => {
-    // Verificar si ya hay una sesión activa
-    const session = getSession();
-    if (session) {
+    const token = localStorage.getItem("token");
+    if (token) {
       navigate('/panel');
-      return;
     }
-    initRegistroPage();
   }, [navigate]);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (formData.region) {
+      setComunas(DATA_RC[formData.region] || []);
+    } else {
+      setComunas([]);
+    }
+  }, [formData.region]);
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    // Map ID to state key
+    const keyMap = {
+      txtNombre: "nombre",
+      txtRut: "rut",
+      txtEmail: "email",
+      txtPass1: "pass1",
+      txtPass2: "pass2",
+      txtTelefono: "telefono",
+      selRegion: "region",
+      selComuna: "comuna"
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      [keyMap[id] || id]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    registrarUsuario(); 
+    
+    // Validaciones básicas
+    if (formData.pass1 !== formData.pass2) {
+      Swal.fire("Error", "Las contraseñas no coinciden", "error");
+      return;
+    }
+
+    try {
+      const userData = {
+        nombreCompleto: formData.nombre,
+        rut: formData.rut,
+        email: formData.email,
+        password: formData.pass1, // Backend likely expects 'password'
+        telefono: formData.telefono,
+        region: formData.region,
+        comuna: formData.comuna,
+        role: "user" // Default role
+      };
+
+      await register(userData);
+
+      Swal.fire({
+        title: "Registro exitoso",
+        text: "¡Tu cuenta fue creada! Ya puedes iniciar sesión.",
+        icon: "success",
+        confirmButtonText: "Ir a login",
+      }).then(() => {
+        navigate("/login");
+      });
+
+    } catch (error) {
+      console.error("Registro error:", error);
+      Swal.fire("Error", "No se pudo registrar el usuario. Intente nuevamente.", "error");
+    }
   };
 
   return (
@@ -26,48 +109,122 @@ function Registro() {
       <section className="section-bg mx-auto" style={{ maxWidth: 720 }}>
         <h1 className="h4 mb-3 text-center">Registro de usuario</h1>
 
-        <form id="frmRegistro" onSubmit={handleSubmit} noValidate>
+        <form id="frmRegistro" onSubmit={handleSubmit}>
           <div className="row g-3">
             <div className="col-12">
               <label htmlFor="txtNombre" className="form-label">Nombre completo</label>
-              <input type="text" className="form-control" id="txtNombre" required minLength={2} maxLength={50} placeholder="Ingrese su nombre completo" />
+              <input 
+                type="text" 
+                className="form-control" 
+                id="txtNombre" 
+                required 
+                minLength={2} 
+                maxLength={50} 
+                placeholder="Ingrese su nombre completo"
+                value={formData.nombre}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="col-12">
               <label htmlFor="txtRut" className="form-label">RUT</label>
-              <input type="text" className="form-control" id="txtRut" required maxLength={12} placeholder="ej: 12.345.678-9" />
+              <input 
+                type="text" 
+                className="form-control" 
+                id="txtRut" 
+                required 
+                maxLength={12} 
+                placeholder="ej: 12.345.678-9"
+                value={formData.rut}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="col-12">
               <label htmlFor="txtEmail" className="form-label">Correo</label>
-              <input type="email" className="form-control" id="txtEmail" required maxLength={100} placeholder="ej: nombre@duoc.cl" />
+              <input 
+                type="email" 
+                className="form-control" 
+                id="txtEmail" 
+                required 
+                maxLength={100} 
+                placeholder="ej: nombre@duoc.cl"
+                value={formData.email}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="col-md-6">
               <label htmlFor="txtPass1" className="form-label">Contraseña</label>
-              <input type="password" className="form-control" id="txtPass1" required minLength={4} maxLength={10} placeholder="entre 4 y 10 caracteres" />
+              <input 
+                type="password" 
+                className="form-control" 
+                id="txtPass1" 
+                required 
+                minLength={4} 
+                maxLength={10} 
+                placeholder="entre 4 y 10 caracteres"
+                value={formData.pass1}
+                onChange={handleChange}
+              />
             </div>
             <div className="col-md-6">
               <label htmlFor="txtPass2" className="form-label">Confirmar contraseña</label>
-              <input type="password" className="form-control" id="txtPass2" required minLength={4} maxLength={10} />
+              <input 
+                type="password" 
+                className="form-control" 
+                id="txtPass2" 
+                required 
+                minLength={4} 
+                maxLength={10}
+                value={formData.pass2}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="col-md-6">
               <label htmlFor="txtTelefono" className="form-label">Teléfono (opcional)</label>
-              <input type="tel" className="form-control" id="txtTelefono" placeholder="+56 9 1234 5678"
-                     pattern="(\+56\s?)?9\s?\d{4}\s?\d{4}" title="Formato: +56 9 1234 5678 o 9 1234 5678" />
+              <input 
+                type="tel" 
+                className="form-control" 
+                id="txtTelefono" 
+                placeholder="+56 9 1234 5678"
+                pattern="(\+56\s?)?9\s?\d{4}\s?\d{4}" 
+                title="Formato: +56 9 1234 5678 o 9 1234 5678"
+                value={formData.telefono}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="col-md-6">
               <label htmlFor="selRegion" className="form-label">Región</label>
-              <select id="selRegion" className="form-select" required>
+              <select 
+                id="selRegion" 
+                className="form-select" 
+                required
+                value={formData.region}
+                onChange={handleChange}
+              >
                 <option value="">— Seleccione la región —</option>
+                {Object.keys(DATA_RC).map(region => (
+                  <option key={region} value={region}>{region}</option>
+                ))}
               </select>
             </div>
             <div className="col-md-6">
               <label htmlFor="selComuna" className="form-label">Comuna</label>
-              <select id="selComuna" className="form-select" required>
+              <select 
+                id="selComuna" 
+                className="form-select" 
+                required
+                value={formData.comuna}
+                onChange={handleChange}
+                disabled={!formData.region}
+              >
                 <option value="">— Seleccione la comuna —</option>
+                {comunas.map(comuna => (
+                  <option key={comuna} value={comuna}>{comuna}</option>
+                ))}
               </select>
             </div>
 

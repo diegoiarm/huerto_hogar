@@ -1,24 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import '../src/css/styles.css';
 import '../src/css/visual.css';
-import { getCatalogo, agregarAlCarrito, CATEGORIES } from '../js/productos';
+import { getProducts, getCategories } from '../src/api_rest';
 import { Toast, Form } from 'react-bootstrap';
 
 const Productos = () => {
   const [categoria, setCategoria] = useState('ALL');
   const [productos, setProductos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
-    const catalogoCompleto = getCatalogo();
-    setProductos(catalogoCompleto);
+    fetchData();
   }, []);
 
-  const handleAgregarAlCarrito = (id) => {
-    const nombreProducto = agregarAlCarrito(id);
-    setToastMessage(`${nombreProducto} agregado al carrito`);
+  const fetchData = async () => {
+    try {
+      const [prodResponse, catResponse] = await Promise.all([
+        getProducts(),
+        getCategories()
+      ]);
+      setProductos(prodResponse.data);
+      setCategorias(catResponse.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const handleAgregarAlCarrito = (producto) => {
+    const LS_CART = "cart.items";
+    let cart = [];
+    try {
+      cart = JSON.parse(localStorage.getItem(LS_CART) || "[]");
+    } catch (e) {
+      cart = [];
+    }
+
+    const foundIndex = cart.findIndex((item) => item.id === producto.id);
+
+    if (foundIndex >= 0) {
+      cart[foundIndex].cantidad += 1;
+    } else {
+      cart.push({
+        id: producto.id,
+        nombre: producto.nombre,
+        precio: producto.precio,
+        cantidad: 1,
+        imagen: producto.imagen,
+        descripcion: producto.descripcion || "",
+        categoria: producto.categoria,
+      });
+    }
+
+    localStorage.setItem(LS_CART, JSON.stringify(cart));
+    
+    // Disparar evento para actualizar badge si es necesario (opcional si NavBar no escucha)
+    // window.dispatchEvent(new Event('storage')); 
+
+    setToastMessage(`${producto.nombre} agregado al carrito`);
     setShowToast(true);
+  };
+
+  // Helper para obtener nombre de categoría
+  const getCategoryName = (catId) => {
+    const cat = categorias.find(c => c.id === catId || c.nombre === catId); // Ajustar según estructura
+    return cat ? cat.nombre : catId;
   };
 
   return (
@@ -48,20 +95,16 @@ const Productos = () => {
 
           <div className="row g-3 mb-3">
             <div className="col-md-5">
-
-              {/* --- INICIO DE LA CORRECCIÓN --- */}
               <Form.Label htmlFor="filtro-categoria">Categoría</Form.Label>
               <Form.Select 
                 id="filtro-categoria" 
                 value={categoria}
                 onChange={(e) => setCategoria(e.target.value)}
               >
-              {/* --- FIN DE LA CORRECCIÓN --- */}
-
                 <option value="ALL">Todas las categorías</option>
-                {Object.entries(CATEGORIES).map(([key, value]) => (
-                  <option key={key} value={key}>
-                    {value.label}
+                {categorias.map((cat) => (
+                  <option key={cat.id} value={cat.nombre}>
+                    {cat.nombre}
                   </option>
                 ))}
               </Form.Select>
@@ -75,20 +118,20 @@ const Productos = () => {
                     <br />
                     Filtra por categoría para ver una curaduría de productos.
                   </>
-                ) : CATEGORIES[categoria] ? (
+                ) : (
                   <>
-                    <strong>{CATEGORIES[categoria].label}</strong>
+                    <strong>{categoria}</strong>
                     <br />
-                    {CATEGORIES[categoria].description}
+                    Productos de la categoría {categoria}
                   </>
-                ) : null}
+                )}
               </div>
             </div>
           </div>
 
           <div className="row g-4">
             {productos
-              .filter(p => categoria === 'ALL' || p.categoria === categoria)
+              .filter(p => categoria === 'ALL' || p.categoria === categoria || p.categoria?.nombre === categoria)
               .map((producto) => (
                 <div key={producto.id} className="col-6 col-md-4 col-lg-3">
                   <div className="card h-100">
@@ -96,6 +139,7 @@ const Productos = () => {
                       src={producto.imagen}
                       className="card-img-top producto-card"
                       alt={producto.nombre}
+                      onError={(e) => {e.target.src = 'https://via.placeholder.com/200'}} // Fallback image
                     />
                     <div className="card-body d-flex flex-column">
                       <h5 className="card-title">{producto.nombre}</h5>
@@ -105,11 +149,11 @@ const Productos = () => {
                         </p>
                       )}
                       <p className="card-text text-success fw-bold">
-                        ${producto.precio.toLocaleString()}
+                        ${producto.precio?.toLocaleString()}
                       </p>
                       <button
                         className="btn btn-outline-success mt-auto"
-                        onClick={() => handleAgregarAlCarrito(producto.id)}
+                        onClick={() => handleAgregarAlCarrito(producto)}
                       >
                         Agregar al carrito
                       </button>
@@ -131,7 +175,8 @@ const Productos = () => {
           position: 'fixed',
           bottom: 20,
           right: 20,
-          minWidth: '200px'
+          minWidth: '200px',
+          zIndex: 9999
         }}
       >
         <Toast.Header>

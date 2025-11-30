@@ -1,13 +1,42 @@
+import { useState, useEffect } from "react";
 import { Navbar, Nav, Container, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import { getSession, clearSession } from "../js/login.js";
+import { Link, useNavigate } from "react-router-dom";
+import { getProfile } from "../src/api_rest";
 
 function NavBar() {
-  const session = getSession();
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  const fetchUser = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      getProfile()
+        .then((response) => {
+          setUser(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching profile:", error);
+          localStorage.removeItem("token");
+          setUser(null);
+        });
+    } else {
+      setUser(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+    window.addEventListener("authChange", fetchUser);
+    return () => {
+      window.removeEventListener("authChange", fetchUser);
+    };
+  }, []);
 
   const handleLogout = () => {
-    clearSession();
-    window.location.reload();
+    localStorage.removeItem("token");
+    setUser(null);
+    window.dispatchEvent(new Event("authChange"));
+    navigate("/");
   };
 
   return (
@@ -35,7 +64,7 @@ function NavBar() {
               Contacto
             </Nav.Link>
             {/* si no hay sesión, muestra Login / Registro */}
-            {!session && (
+            {!user && (
               <>
                 <Nav.Link as={Link} to="/login">
                   Login
@@ -52,7 +81,7 @@ function NavBar() {
             </Nav.Link>
 
             {/* si hay sesión, muestra badge y botón logout */}
-            {session && (
+            {user && (
               <>
                 {/* Divisor visual para separar opciones de usuario */}
                 <div className="vr text-white d-none d-lg-block mx-3" style={{ height: '35px', opacity: 0.3 }}></div>
@@ -63,7 +92,7 @@ function NavBar() {
                     <i className="fas fa-user text-white" style={{ fontSize: '1.1rem', cursor: 'pointer' }}></i>
                   </Nav.Link>
                   <span className="badge bg-light text-dark">
-                    {session.email} ({session.role})
+                    {user.email} ({user.role || "user"})
                   </span>
                   <Button variant="primary" size="sm" onClick={handleLogout}>
                     Cerrar sesión
