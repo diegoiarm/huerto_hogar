@@ -1,120 +1,119 @@
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, useNavigate } from 'react-router-dom';
+import Registro from '../../pages/Registro';
+import * as api from '../api_rest';
+import Swal from 'sweetalert2';
 
-// --- 1. Mocks de Módulos ---
+// Mock de CSS
+vi.mock('../css/styles.css', () => ({ default: {} }));
+vi.mock('../css/visual.css', () => ({ default: {} }));
 
-// Mockeamos el hook 'useNavigate' de react-router-dom
+// Mock de api_rest
+vi.mock('../api_rest', () => ({
+    register: vi.fn(),
+}));
+
+// Mock de Swal
+vi.mock('sweetalert2', () => ({
+    default: {
+        fire: vi.fn().mockResolvedValue({ isConfirmed: true }),
+    }
+}));
+
+// Mock de useNavigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async (importOriginal) => {
-  const original = await importOriginal();
-  return {
-    ...original, // Mantenemos <MemoryRouter>, etc.
-    useNavigate: () => mockNavigate, // Reemplazamos useNavigate con nuestro espía
-  };
+    const actual = await importOriginal();
+    return {
+        ...actual,
+        useNavigate: () => mockNavigate,
+    };
 });
 
-// Mockeamos 'js/login.js'
-vi.mock('../../js/login', () => ({
-  getSession: vi.fn(),
-}));
+describe('Componente Registro', () => {
+    afterEach(() => {
+        cleanup();
+        vi.clearAllMocks();
+        localStorage.clear();
+    });
 
-// Mockeamos 'js/registro.js'
-vi.mock('../../js/registro', () => ({
-  initRegistroPage: vi.fn(),
-  registrarUsuario: vi.fn(),
-}));
+    it('debería renderizar el formulario correctamente', () => {
+        render(
+            <MemoryRouter>
+                <Registro />
+            </MemoryRouter>
+        );
+        expect(screen.getByRole('heading', { name: /Registro de usuario/i })).toBeInTheDocument();
+        expect(screen.getByLabelText(/Nombre completo/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/RUT/i)).toBeInTheDocument();
+    });
 
-// --- 2. Importación del Componente y Mocks ---
-import Registro from '../../pages/Registro';
-// Importamos los mocks para poder controlarlos
-import { getSession } from '../../js/login';
-import { initRegistroPage, registrarUsuario } from '../../js/registro';
+    it('debería mostrar error si las contraseñas no coinciden', async () => {
+        const user = userEvent.setup();
+        render(
+            <MemoryRouter>
+                <Registro />
+            </MemoryRouter>
+        );
 
-// --- 3. Wrapper de Renderizado ---
-// OBLIGATORIO porque el componente usa 'useNavigate'
-const renderRegistro = () => {
-  render(
-    <MemoryRouter>
-      <Registro />
-    </MemoryRouter>
-  );
-};
+        // Llenar campos requeridos para saltar la validación HTML5
+        await user.type(screen.getByLabelText(/Nombre completo/i), 'Usuario Test');
+        await user.type(screen.getByLabelText(/RUT/i), '11.111.111-1');
+        await user.type(screen.getByLabelText(/Correo/i), 'test@test.com');
+        await user.selectOptions(screen.getByLabelText(/Región/i), "Región Metropolitana de Santiago");
+        await user.selectOptions(screen.getByLabelText(/Comuna/i), "Santiago");
 
-// --- 4. Configuración ---
-afterEach(cleanup);
-beforeEach(() => {
-  vi.resetAllMocks(); // Limpia todos los mocks (navigate, getSession, etc.)
-});
+        await user.type(screen.getByLabelText('Contraseña'), '1234');
+        await user.type(screen.getByLabelText(/Confirmar contraseña/i), '5678');
+        await user.click(screen.getByRole('button', { name: /Registrar/i }));
 
-// --- 5. Las Pruebas ---
+        expect(Swal.fire).toHaveBeenCalledWith("Error", "Las contraseñas no coinciden", "error");
+        expect(api.register).not.toHaveBeenCalled();
+    });
 
-describe('Componente Registro (Usuario Desconectado)', () => {
+    it('debería registrar exitosamente y redirigir', async () => {
+        const user = userEvent.setup();
+        vi.mocked(api.register).mockResolvedValue({ data: { success: true } });
 
-  beforeEach(() => {
-    // Para este escenario, getSession() no devuelve nada
-    vi.mocked(getSession).mockReturnValue(null);
-  });
+        render(
+            <MemoryRouter>
+                <Registro />
+            </MemoryRouter>
+        );
 
-  // Test TC-036: Verificación de renderizado y lógica inicial de useEffect
-  it('debería renderizar el formulario completo y llamar a initRegistroPage()', () => {
-    renderRegistro();
+        // Llenar formulario
+        await user.type(screen.getByLabelText(/Nombre completo/i), 'Pepe');
+        await user.type(screen.getByLabelText(/RUT/i), '12345678-9');
+        await user.type(screen.getByLabelText(/Correo/i), 'pepe@test.com');
+        await user.type(screen.getByLabelText('Contraseña'), '1234');
+        await user.type(screen.getByLabelText(/Confirmar contraseña/i), '1234');
 
-    // 1. Verificamos el renderizado
-    expect(screen.getByRole('heading', { level: 1, name: /Registro de usuario/i })).toBeInTheDocument();
-    
-    // Verificamos los campos (¡Ahora funciona porque el JSX tiene htmlFor/id!)
-    expect(screen.getByLabelText(/Nombre completo/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/RUT/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Correo/i)).toBeInTheDocument();
-    expect(screen.getByLabelText('Contraseña')).toBeInTheDocument(); // Texto exacto
-    expect(screen.getByLabelText(/Confirmar contraseña/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Teléfono/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Región/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Comuna/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Registrar/i })).toBeInTheDocument();
+        await user.selectOptions(screen.getByLabelText(/Región/i), "Región Metropolitana de Santiago");
+        await user.selectOptions(screen.getByLabelText(/Comuna/i), "Santiago");
 
-    // 2. Verificamos la lógica del useEffect
-    expect(getSession).toHaveBeenCalledOnce();
-    expect(initRegistroPage).toHaveBeenCalledOnce(); // SÍ debe inicializar
-    expect(mockNavigate).not.toHaveBeenCalled();  // NO debe navegar
-  });
+        await user.click(screen.getByRole('button', { name: /Registrar/i }));
 
-  // Test TC-037: Verificación de evento de submit del formulario
-  it('debería llamar a registrarUsuario() al hacer clic en el botón "Registrar"', async () => {
-    const user = userEvent.setup();
-    renderRegistro();
+        expect(api.register).toHaveBeenCalled();
 
-    // Limpiamos los mocks del render inicial
-    vi.mocked(getSession).mockClear();
-    vi.mocked(initRegistroPage).mockClear();
+        await waitFor(() => {
+            expect(Swal.fire).toHaveBeenCalledWith(expect.objectContaining({ title: "Registro exitoso" }));
+        });
 
-    // 1. Acción: Clic en el botón
-    const submitButton = screen.getByRole('button', { name: /Registrar/i });
-    await user.click(submitButton);
+        // Verificar navegación después de la confirmación de Swal
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith("/login");
+        });
+    });
 
-    // 2. Assertions
-    expect(registrarUsuario).toHaveBeenCalledOnce(); // Función de submit llamada
-    expect(initRegistroPage).not.toHaveBeenCalled();
-    expect(mockNavigate).not.toHaveBeenCalled();
-  });
-});
-
-describe('Componente Registro (Usuario Conectado)', () => {
-
-  // Test TC-038: Verificación de redirección si ya hay sesión
-  it('debería redirigir a /panel y NO llamar a initRegistroPage()', () => {
-    // 1. Setup: Simulamos que SÍ hay sesión
-    vi.mocked(getSession).mockReturnValue({ email: 'test@user.com' });
-
-    // 2. Acción: Renderizar
-    renderRegistro();
-
-    // 3. Assertions (Verificamos la lógica del useEffect)
-    expect(getSession).toHaveBeenCalledOnce();
-    expect(mockNavigate).toHaveBeenCalledOnce(); // SÍ debe navegar
-    expect(mockNavigate).toHaveBeenCalledWith('/panel'); // A la ruta correcta
-    expect(initRegistroPage).not.toHaveBeenCalled(); // NO debe inicializar
-  });
+    it('debería redirigir si ya hay token', () => {
+        localStorage.setItem('token', 'exists');
+        render(
+            <MemoryRouter>
+                <Registro />
+            </MemoryRouter>
+        );
+        expect(mockNavigate).toHaveBeenCalledWith('/panel');
+    });
 });

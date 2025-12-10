@@ -1,124 +1,73 @@
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
-import { MemoryRouter } from 'react-router-dom'; // Necesario para <Link>
+import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
+import NavBar from '../../pages/NavBar';
+import * as api from '../api_rest';
 
-// --- 1. Mocks de CSS (Se elevan/hoisted) ---
-vi.mock('../src/css/styles.css', () => ({ default: {} }));
-vi.mock('../src/css/visual.css', () => ({ default: {} }));
+// Mock de CSS
+vi.mock('../css/styles.css', () => ({ default: {} }));
+vi.mock('../css/visual.css', () => ({ default: {} }));
 
-// --- 2. Mock del módulo 'login.js' ---
-// Mockeamos el módulo ANTES de importarlo.
-// (¡Ruta corregida a ../../ para subir desde src/tests/ a la raíz!)
-vi.mock('../../js/login.js', () => ({
-  getSession: vi.fn(),
-  clearSession: vi.fn(),
+// Mock de api_rest
+vi.mock('../api_rest', () => ({
+    getProfile: vi.fn(),
 }));
 
-// --- 3. Importación del Componente y Mocks ---
-import NavBar from '../../pages/NavBar';
-// Importamos los mocks para poder controlarlos
-import { getSession, clearSession } from '../../js/login.js';
+describe('Componente NavBar', () => {
+    afterEach(() => {
+        cleanup();
+        vi.clearAllMocks();
+        localStorage.clear();
+    });
 
-// --- 4. Wrapper de Renderizado ---
-// OBLIGATORIO porque el componente usa <Link> de react-router-dom
-const renderNavBar = () => {
-  render(
-    <MemoryRouter>
-      <NavBar />
-    </MemoryRouter>
-  );
-};
+    it('debería mostrar enlaces públicos cuando no hay sesión', async () => {
+        // Mock de getSession (profile) fallido o token nulo
+        render(
+            <MemoryRouter>
+                <NavBar />
+            </MemoryRouter>
+        );
 
-// --- 5. Configuración ---
-afterEach(() => {
-  cleanup(); // Limpia el JSDOM
-  vi.restoreAllMocks(); // Restaura todos los espías
-});
+        expect(screen.getByText('Login')).toBeInTheDocument();
+        expect(screen.getByText('Registrarse')).toBeInTheDocument();
+        expect(screen.queryByText('Cerrar sesión')).not.toBeInTheDocument();
+    });
 
-beforeEach(() => {
-  // Mockeamos window.location.reload
-  // (es necesario porque no es editable por defecto)
-  Object.defineProperty(window, 'location', {
-    writable: true,
-    value: { ...window.location, reload: vi.fn() },
-  });
-});
+    it('debería mostrar usuario y botón de cerrar sesión cuando hay token', async () => {
+        localStorage.setItem('token', 'valid-token');
+        const usuarioMock = { email: 'test@test.com', role: 'admin' };
+        vi.mocked(api.getProfile).mockResolvedValue({ data: usuarioMock });
 
-// --- 6. Las Pruebas ---
+        render(
+            <MemoryRouter>
+                <NavBar />
+            </MemoryRouter>
+        );
 
-describe('Componente NavBar (Usuario Desconectado)', () => {
+        await waitFor(() => {
+            expect(screen.getByText(/test@test.com/)).toBeInTheDocument();
+        });
+        expect(screen.getByText('Cerrar sesión')).toBeInTheDocument();
+        expect(screen.queryByText('Login')).not.toBeInTheDocument();
+    });
 
-  beforeEach(() => {
-    // Para este bloque, simulamos que getSession() devuelve null
-    vi.mocked(getSession).mockReturnValue(null);
-  });
+    it('debería cerrar sesión correctamente', async () => {
+        const user = userEvent.setup();
+        localStorage.setItem('token', 'valid-token');
+        vi.mocked(api.getProfile).mockResolvedValue({ data: { email: 'u', role: 'u' } });
 
-  // Test TC-026: Verificación de enlaces públicos y de sesión
-  it('debería renderizar los enlaces públicos, Login y Registrarse', () => {
-    renderNavBar();
+        render(
+            <MemoryRouter>
+                <NavBar />
+            </MemoryRouter>
+        );
 
-    // Verificamos enlaces públicos
-    expect(screen.getByRole('link', { name: /Inicio/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Productos/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Nosotros/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Blog/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Contacto/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: '🛒' })).toBeInTheDocument(); // Carrito
+        await waitFor(() => expect(screen.getByText('Cerrar sesión')).toBeInTheDocument());
 
-    // Verificamos que los links de Login SÍ están
-    expect(screen.getByRole('link', { name: /Login/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Registrarse/i })).toBeInTheDocument();
-  });
+        await user.click(screen.getByText('Cerrar sesión'));
 
-  // Test TC-027: Verificación de ausencia de elementos de sesión
-  it('NO debería mostrar los elementos de sesión (badge, link a panel, botón logout)', () => {
-    renderNavBar();
-
-    // Verificamos que los elementos de sesión NO están
-    expect(screen.queryByRole('button', { name: /Cerrar sesión/i })).not.toBeInTheDocument();
-    expect(screen.queryByText(/@/i)).not.toBeInTheDocument(); // El email en el badge
-    // El link al panel es el que tiene el ícono de usuario
-    expect(screen.queryByRole('link', { name: /fas fa-user/i })).not.toBeInTheDocument();
-  });
-});
-
-
-describe('Componente NavBar (Usuario Conectado)', () => {
-
-  // Simulamos un objeto de sesión
-  const mockSessionData = {
-    email: 'test@huerto.com',
-    role: 'cliente',
-  };
-
-  beforeEach(() => {
-    // Para este bloque, simulamos que getSession() devuelve datos
-    vi.mocked(getSession).mockReturnValue(mockSessionData);
-  });
-
-  // Test TC-028: Verificación de ausencia de enlaces de Login y Registro
-  it('NO debería mostrar "Login" y "Registrarse"', () => {
-    renderNavBar();
-    
-    // Verificamos que los links de Login y Registro NO están
-    expect(screen.queryByRole('link', { name: /Login/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /Registrarse/i })).not.toBeInTheDocument();
-  });
-
-  // Test TC-029: Verificación de elementos de sesión
-  it('debería llamar a clearSession() y window.location.reload() al hacer clic en "Cerrar sesión"', async () => {
-    const user = userEvent.setup();
-    renderNavBar();
-
-    // 1. Buscamos el botón
-    const logoutButton = screen.getByRole('button', { name: /Cerrar sesión/i });
-
-    // 2. Acción: Simular clic
-    await user.click(logoutButton);
-
-    // 3. Verificamos que las funciones (que mockeamos) fueron llamadas
-    expect(clearSession).toHaveBeenCalledOnce();
-    expect(window.location.reload).toHaveBeenCalledOnce();
-  });
+        expect(localStorage.getItem('token')).toBeNull();
+        expect(screen.getByText('Login')).toBeInTheDocument();
+    });
 });

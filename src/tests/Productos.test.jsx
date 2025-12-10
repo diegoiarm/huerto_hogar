@@ -1,104 +1,82 @@
-import { render, screen, cleanup, within } from '@testing-library/react';
+import { render, screen, cleanup, waitFor, fireEvent, within } from '@testing-library/react';
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
-import userEvent from '@testing-library/user-event'; 
+import userEvent from '@testing-library/user-event';
+import Productos from '../../pages/Productos';
+import * as api from '../api_rest';
 
-// --- 1. Mocks de Módulos Externos ---
+// Mock de CSS
 vi.mock('../css/styles.css', () => ({ default: {} }));
 vi.mock('../css/visual.css', () => ({ default: {} }));
 
-// Mockeamos el módulo de lógica 'productos.js'
-vi.mock('../../js/productos', () => ({
-  getCatalogo: vi.fn(),
-  agregarAlCarrito: vi.fn(),
-  CATEGORIES: { 
-    VERDURAS: { label: 'Verduras', description: 'Descripción de Verduras' },
-    FRUTAS: { label: 'Frutas', description: 'Descripción de Frutas' }
-  }
+// Mock de api_rest
+vi.mock('../api_rest', () => ({
+    getProducts: vi.fn(),
+    getCategories: vi.fn(),
 }));
 
-// --- 2. Importación del Componente y Mocks ---
-import Productos from '../../pages/Productos';
-import { getCatalogo, agregarAlCarrito, CATEGORIES } from '../../js/productos';
-
-// --- 3. Datos de Prueba ---
-const mockCatalogoData = [
-  { id: 1, nombre: 'Tomate', precio: 1500, categoria: 'VERDURAS', imagen: 'img1.jpg', descripcion: 'Un tomate rojo y jugoso.' },
-  { id: 2, nombre: 'Manzana', precio: 1200, categoria: 'FRUTAS', imagen: 'img2.jpg', descripcion: 'Una manzana verde y crujiente.' },
-  { id: 3, nombre: 'Lechuga', precio: 800, categoria: 'VERDURAS', imagen: 'img3.jpg', descripcion: 'Una lechuga fresca.' }
+const productosPrueba = [
+    { id: 1, nombre: 'Tomate', precio: 1500, categoria: 'Verduras', imagen: 'img1.jpg', descripcion: 'Un tomate' },
+    { id: 2, nombre: 'Manzana', precio: 1200, categoria: 'Frutas', imagen: 'img2.jpg', descripcion: 'Una manzana' }
 ];
 
-// --- 4. Configuración de Pruebas ---
-afterEach(cleanup);
-beforeEach(() => {
-  vi.resetAllMocks(); 
-  vi.mocked(getCatalogo).mockReturnValue(mockCatalogoData);
-});
+const categoriasPrueba = [
+    { id: 1, nombre: 'Verduras' },
+    { id: 2, nombre: 'Frutas' }
+];
 
-// --- 5. Las Pruebas ---
 describe('Componente Productos', () => {
+    afterEach(() => {
+        cleanup();
+        vi.clearAllMocks();
+        localStorage.clear();
+    });
 
-  // Test TC-033: Verificación de renderizado inicial
-  it('debería renderizar, llamar a getCatalogo y mostrar todos los productos por defecto', () => {
-    render(<Productos />);
-    expect(getCatalogo).toHaveBeenCalledOnce();
-    expect(screen.getByText('Tomate')).toBeInTheDocument();
-    expect(screen.getByText('Manzana')).toBeInTheDocument();
-    expect(screen.getByText('Lechuga')).toBeInTheDocument();
-    expect(screen.getByText(/Explora todo nuestro catálogo/i)).toBeInTheDocument();
-  });
+    beforeEach(() => {
+        vi.mocked(api.getProducts).mockResolvedValue({ data: productosPrueba });
+        vi.mocked(api.getCategories).mockResolvedValue({ data: categoriasPrueba });
+    });
 
-  // Test TC-034: Verificación de filtrado por categoría y actualización de descripción
-  it('debería filtrar productos y actualizar la descripción al cambiar el select (Gestión de Estado)', async () => {
-    const user = userEvent.setup(); 
-    render(<Productos />);
+    it('debería renderizar y cargar productos', async () => {
+        render(<Productos />);
 
-    // 1. Estado inicial
-    expect(screen.getByText('Manzana')).toBeInTheDocument();
+        expect(screen.getByText('Catálogo de Productos')).toBeInTheDocument();
 
-    // 2. Acción: Seleccionar "Verduras"
-    const select = screen.getByLabelText('Categoría'); // Esto ya funciona
-    await user.selectOptions(select, 'VERDURAS');
+        await waitFor(() => {
+            expect(screen.getByText('Tomate')).toBeInTheDocument();
+            expect(screen.getByText('Manzana')).toBeInTheDocument();
+        });
+    });
 
-    // 3. Assertions (Renderizado de Lista)
-    expect(screen.getByText('Tomate')).toBeInTheDocument();
-    expect(screen.getByText('Lechuga')).toBeInTheDocument();
-    expect(screen.queryByText('Manzana')).not.toBeInTheDocument(); 
+    it('debería filtrar productos por categoría', async () => {
+        const user = userEvent.setup();
+        render(<Productos />);
 
-    // --- INICIO DE LA CORRECCIÓN ---
-    // 4. Assertions (Cuadro de descripción)
-    
-    // No podemos usar getByText('Verduras') porque está duplicado.
-    // En su lugar, buscamos el texto de la descripción (que es único).
-    const descripcion = screen.getByText(CATEGORIES.VERDURAS.description);
-    
-    // Ahora, buscamos el contenedor padre de esa descripción
-    const descripcionContainer = descripcion.parentElement;
+        await waitFor(() => expect(screen.getByText('Tomate')).toBeInTheDocument());
 
-    // Y verificamos que, DENTRO de ese contenedor, está el título <strong>
-    expect(within(descripcionContainer).getByText(CATEGORIES.VERDURAS.label)).toBeInTheDocument();
-    // --- FIN DE LA CORRECCIÓN ---
-    
-    expect(screen.queryByText(/Explora todo nuestro catálogo/i)).not.toBeInTheDocument();
-  });
+        const select = screen.getByLabelText('Categoría');
+        await user.selectOptions(select, 'Verduras');
 
-  // Test TC-035: Verificación de evento de agregar al carrito y Toast
-  it('debería llamar a agregarAlCarrito y mostrar un Toast al hacer clic (Prueba de Eventos)', async () => {
-    const user = userEvent.setup(); 
-    vi.mocked(agregarAlCarrito).mockReturnValue('Tomate');
-    
-    render(<Productos />);
+        expect(screen.getByText('Tomate')).toBeInTheDocument();
+        expect(screen.queryByText('Manzana')).not.toBeInTheDocument();
+    });
 
-    const cardTomate = screen.getByText('Tomate').closest('.card');
-    const botonAgregar = within(cardTomate).getByRole('button', { name: /Agregar al carrito/i });
-    
-    await user.click(botonAgregar);
+    it('debería agregar al carrito y mostrar toast', async () => {
+        const user = userEvent.setup();
+        render(<Productos />);
 
-    expect(agregarAlCarrito).toHaveBeenCalledOnce();
-    expect(agregarAlCarrito).toHaveBeenCalledWith(1); 
+        await waitFor(() => expect(screen.getByText('Tomate')).toBeInTheDocument());
 
-    const toast = await screen.findByRole('alert');
-    expect(toast).toBeInTheDocument();
-    expect(within(toast).getByText('Tomate agregado al carrito')).toBeInTheDocument();
-  });
+        const tarjetaTomate = screen.getByText('Tomate').closest('.card');
+        const botonAgregar = within(tarjetaTomate).getByRole('button', { name: /Agregar al carrito/i });
 
+        await user.click(botonAgregar);
+
+        // Verificar notificación (toast)
+        expect(await screen.findByText('Tomate agregado al carrito')).toBeInTheDocument();
+
+        // Verificar localStorage
+        const carrito = JSON.parse(localStorage.getItem('cart.items'));
+        expect(carrito).toHaveLength(1);
+        expect(carrito[0].nombre).toBe('Tomate');
+    });
 });
